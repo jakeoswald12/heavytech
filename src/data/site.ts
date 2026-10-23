@@ -102,6 +102,7 @@ export const machines: Machine[] = [
       { src: "/images/machines/arlo_base218.webp", alt: "ARLO base chassis with boom raised", caption: "Base chassis" },
       { src: "/images/machines/arlo_main.webp", alt: "ARLO power and hydraulic modules", caption: "Power and hydraulic modules" },
     ],
+    model: { src: "/models/arlo.splat", rotX: Math.PI, rotY: Math.PI / 2, scale: 1.3, y: 0.03 },
   },
   {
     slug: "defensex",
@@ -126,6 +127,7 @@ export const machines: Machine[] = [
       { src: "/images/machines/defx3.webp", alt: "DefenseX with cargo deck configuration", caption: "Cargo deck" },
       { src: "/images/machines/defx2.webp", alt: "DefenseX with roll bar and blade", caption: "Blade configuration" },
     ],
+    model: { src: "/models/defensex.splat", rotX: Math.PI, rotY: 0, scale: 1.25, y: 0.03 },
   },
 ];
 

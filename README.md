@@ -2,7 +2,7 @@
 
 Marketing site for HeavyTech, Inc.: hybrid and electric off-highway machines built in Fort Wayne, Indiana.
 
-Built with Next.js (App Router) + React + TypeScript + Tailwind CSS, exported as a static site for Cloudflare Pages. The home page and the HT-1 page include an interactive 3D Gaussian-splat model of the machine, rendered with [Spark](https://sparkjs.dev) on three.js.
+Built with Next.js (App Router) + React + TypeScript + Tailwind CSS, exported as a static site for Cloudflare Pages. The home page and each machine page include an interactive 3D Gaussian-splat model of the machine, rendered with [Spark](https://sparkjs.dev) on three.js.
 
 ## Run it locally
 
