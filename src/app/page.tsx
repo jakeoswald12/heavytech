@@ -52,7 +52,7 @@ export default function Home() {
           </div>
           <div className="machines-grid">
             {machines.map((m, i) => (
-              <MachineCard key={m.slug} m={m} index={i} show3D />
+              <MachineCard key={m.slug} m={m} index={i} />
             ))}
           </div>
         </div>

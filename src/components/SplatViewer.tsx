@@ -15,12 +15,16 @@ export default function SplatViewer({
   alt,
   className = "",
   compact = false,
+  bare = false,
 }: {
   model: SplatModel;
   poster: string;
   alt: string;
   className?: string;
+  /** Pull the camera back for smaller frames. */
   compact?: boolean;
+  /** No status line, and only start loading when scrolled near (for cards). */
+  bare?: boolean;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,7 +37,7 @@ export default function SplatViewer({
     let disposed = false;
     let cleanup = () => {};
 
-    (async () => {
+    const start = async () => {
       try {
         const THREE = await import("three");
         const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
@@ -112,20 +116,38 @@ export default function SplatViewer({
       } catch {
         if (!disposed) setStatus("error");
       }
-    })();
+    };
+
+    // Cards wait until they're near the viewport so the page doesn't load every model at once.
+    let near: IntersectionObserver | undefined;
+    if (bare) {
+      near = new IntersectionObserver(
+        ([e]) => {
+          if (e.isIntersecting) {
+            near?.disconnect();
+            start();
+          }
+        },
+        { rootMargin: "300px 0px" },
+      );
+      near.observe(stage);
+    } else {
+      start();
+    }
 
     return () => {
       disposed = true;
+      near?.disconnect();
       cleanup();
     };
-  }, [model, compact]);
+  }, [model, compact, bare]);
 
   // The studio render stands in until the 3D model is ready (or if 3D can't run on this device).
   const showPoster = status !== "live";
   const statusText = status === "live" ? "Drag to rotate" : status === "loading" ? "Loading 3D model…" : "Studio render";
 
   return (
-    <div className={`splat ${className}`}>
+    <div className={`splat ${bare ? "splat-bare" : ""} ${className}`}>
       <div ref={stageRef} className="splat-stage">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="splat-poster" src={poster} alt={alt} style={{ opacity: showPoster ? 1 : 0 }} />
@@ -136,12 +158,14 @@ export default function SplatViewer({
           style={{ visibility: status === "error" ? "hidden" : "visible" }}
         />
       </div>
-      <div className="splat-ctl">
-        <span className="label splat-status" data-live={status === "live"}>
-          <span className="dot" aria-hidden="true" />
-          {statusText}
-        </span>
-      </div>
+      {bare ? null : (
+        <div className="splat-ctl">
+          <span className="label splat-status" data-live={status === "live"}>
+            <span className="dot" aria-hidden="true" />
+            {statusText}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

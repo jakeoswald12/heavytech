@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Machine, NewsItem } from "@/data/site";
 import Reveal from "./Reveal";
-import View3DButton from "./View3DButton";
+import SplatViewer from "./SplatViewer";
 
 /** Top-of-page header for inner pages. */
 export function PageHeader({ label, title, lede, children }: { label: string; title: ReactNode; lede?: ReactNode; children?: ReactNode }) {
@@ -56,14 +56,18 @@ export function Split({
   );
 }
 
-export function MachineCard({ m, index, show3D = false }: { m: Machine; index: number; show3D?: boolean }) {
+export function MachineCard({ m, index }: { m: Machine; index: number }) {
   const href = `/machines/${m.slug}/`;
   return (
     <article className="machine-card">
-      <Link href={href} className="machine-img" tabIndex={-1} aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={m.hero.src} alt="" loading="lazy" />
-      </Link>
+      <div className="machine-img">
+        {m.model ? (
+          <SplatViewer model={m.model} poster={m.hero.src} alt={m.hero.alt} compact bare />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={m.hero.src} alt={m.hero.alt} loading="lazy" />
+        )}
+      </div>
       <div className="machine-meta">
         <div className="machine-tags">
           <span className="label">[ {String(index + 1).padStart(2, "0")} ]</span>
@@ -80,7 +84,6 @@ export function MachineCard({ m, index, show3D = false }: { m: Machine; index: n
           <Link href={href} className="btn btn-ghost">
             View machine <span aria-hidden="true">→</span>
           </Link>
-          {show3D && m.model ? <View3DButton slug={m.slug} /> : null}
         </div>
       </div>
     </article>

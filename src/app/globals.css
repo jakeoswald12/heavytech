@@ -97,7 +97,8 @@ p { margin: 0; }
 .inner { max-width: 1920px; margin: 0 auto; }
 .section { padding-block: clamp(72px, 10vw, 150px); border-top: 1px solid var(--rule); }
 .section-tight { padding-block: clamp(56px, 7vw, 100px); border-top: 1px solid var(--rule); }
-.band { background-color: var(--bg-2); }
+/* Bands share the page background; sections are separated by hairline rules only. */
+.band { background-color: var(--bg); }
 
 /* ---------- type ---------- */
 .display {
