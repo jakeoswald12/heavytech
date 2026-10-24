@@ -103,11 +103,13 @@ export default function Home() {
         <div className="inner hero-inner">
           <div className="hero-copy">
             <h1 className="display h-xl hero-title">
-              <span>Next Gen</span>
+              <span>Next-Gen</span>
               <span>Off-Highway</span>
               <span>Machinery</span>
             </h1>
-            <p className="lede hero-lede">Cheaper to own. Easier to fix. Smoother to operate.</p>
+            <p className="lede hero-lede">
+              <span>Cheaper to own.</span> <span>Easier to fix.</span> <span>Smoother to operate.</span>
+            </p>
           </div>
         </div>
       </section>

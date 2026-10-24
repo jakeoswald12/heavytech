@@ -66,7 +66,7 @@ export default function Nav() {
   };
 
   return (
-    <header className="nav wrap">
+    <header className="nav wrap" data-open={open ? "true" : undefined}>
       <div className="inner nav-row">
         <Link href="/" className="wordmark" aria-label="HeavyTech home" onClick={(e) => pick(e, "top")}>
           HeavyTech
@@ -100,27 +100,27 @@ export default function Nav() {
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpenOn(open ? null : pathname)}
           >
-            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-              {open ? (
-                <path d="M4 4l12 12M16 4L4 16" />
-              ) : (
-                <path d="M2.5 5.5h15M2.5 10h15M2.5 14.5h15" />
-              )}
+            {/* Three bars that fold into an X when the menu opens. */}
+            <svg className="burger-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path className="bar bar-1" d="M2.5 5.5h15" />
+              <path className="bar bar-2" d="M2.5 10h15" />
+              <path className="bar bar-3" d="M2.5 14.5h15" />
             </svg>
           </button>
         </div>
       </div>
-      <div id="mobile-menu" className="mobile-menu wrap" hidden={!open}>
+      {/* Always rendered so it can animate in and out; inert while closed so it can't be tabbed into. */}
+      <div id="mobile-menu" className="mobile-menu wrap" inert={!open} aria-hidden={!open}>
         <ul>
           {nav.map((item, i) => (
-            <li key={item.id}>
+            <li key={item.id} style={{ ["--i" as string]: i }}>
               <a href={href(item.id)} onClick={(e) => pick(e, item.id)} aria-current={item.id === active ? "true" : undefined}>
                 <span className="label">[ {String(i + 1).padStart(2, "0")} ]</span>
                 <span className="display h-m">{item.label}</span>
               </a>
             </li>
           ))}
-          <li>
+          <li style={{ ["--i" as string]: nav.length }}>
             <Link href="/reserve/">
               <span className="label">[ {String(nav.length + 1).padStart(2, "0")} ]</span>
               <span className="display h-m accent">Reserve</span>

@@ -15,7 +15,7 @@
   --accent: #f2b20d;
   --on-accent: #111110;
   --glow: rgba(255, 236, 200, 0.06);
-  --grain: url("/textures/grain-dark.png");
+  --grain: url("/textures/grain-dark-faint.png");
   --gutter: max(16px, 1.6vw);
   color-scheme: dark;
 }
@@ -31,7 +31,7 @@
     --accent: #c98c00;
     --on-accent: #111110;
     --glow: rgba(255, 255, 255, 0.6);
-    --grain: url("/textures/grain-light.png");
+    --grain: url("/textures/grain-light-faint.png");
     color-scheme: light;
   }
 }
@@ -46,7 +46,7 @@
   --accent: #c98c00;
   --on-accent: #111110;
   --glow: rgba(255, 255, 255, 0.6);
-  --grain: url("/textures/grain-light.png");
+  --grain: url("/textures/grain-light-faint.png");
   color-scheme: light;
 }
 
@@ -65,7 +65,7 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 /* No elastic bounce past the top or bottom of the page. */
-html, body { overscroll-behavior-y: none; }
+html { overscroll-behavior-y: none; }
 body {
   margin: 0;
   background-color: var(--bg);

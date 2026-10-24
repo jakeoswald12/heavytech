@@ -6,3 +6,6 @@ export const themeScript = `try{var t=localStorage.getItem('ht-theme');if(t==='l
 
 /** Arms the scroll-reveal starting state (skipped when motion is reduced or the observer is missing). */
 export const revealScript = `try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window)document.documentElement.classList.add('reveal-ready')}catch(e){}`;
+
+/** Always open at the top (unless a section link was used) instead of restoring an old scroll spot. */
+export const scrollTopScript = `try{if('scrollRestoration' in history)history.scrollRestoration='manual';if(!location.hash){scrollTo(0,0);addEventListener('load',function(){if(!location.hash&&scrollY<200)scrollTo(0,0)})}}catch(e){}`;

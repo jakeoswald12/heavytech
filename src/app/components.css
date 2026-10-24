@@ -6,14 +6,18 @@
 
 /* ---------- nav ---------- */
 .nav {
-  position: sticky;
+  /* Fixed (not sticky) so it stays put on iPhone browsers; body padding keeps the page below it. */
+  position: fixed;
   top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
   z-index: 50;
   /* No fill: the header floats over the page as it scrolls. */
   background: transparent;
 }
-/* Only the open phone menu gets a solid background, so its list is readable. */
-.nav:has(.mobile-menu:not([hidden])) { background: var(--bg); }
+/* Only the open phone menu gets a solid background, so its list is readable. It fades in with the menu. */
+.nav { transition: background-color 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.nav[data-open] { background-color: var(--bg); }
 .nav-row { display: flex; align-items: flex-start; gap: 28px; padding-block: 16px; }
 .wordmark {
   font-family: var(--font-display);
@@ -72,12 +76,50 @@
 .nav-actions .btn { height: 40px; box-sizing: border-box; }
 .theme-toggle { width: 40px; height: 40px; padding: 0; justify-content: center; }
 .nav-burger { display: none; width: 40px; padding: 0; justify-content: center; }
-.mobile-menu { border-top: 1px solid var(--rule); background: var(--bg); height: calc(100dvh - 64px); overflow-y: auto; }
+/* Phone menu: a panel that unrolls down from the header, with its rows rising in one after another.
+   Closing reverses it faster: rows fade first, then the panel rolls back up. */
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--bg);
+  height: calc(100dvh - 64px - env(safe-area-inset-top, 0px));
+  overflow-y: auto;
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.45s cubic-bezier(0.6, 0, 0.3, 1) 0.12s, visibility 0s linear 0.57s;
+}
+.nav[data-open] .mobile-menu {
+  visibility: visible;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.6s cubic-bezier(0.7, 0, 0.2, 1), visibility 0s;
+}
+.mobile-menu li {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.2s ease, transform 0.25s ease;
+}
+.nav[data-open] .mobile-menu li {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(0.18s + var(--i, 0) * 0.05s);
+}
+@media (min-width: 981px) { .mobile-menu { display: none; } }
+/* Hamburger folds into an X. */
+.burger-icon .bar { transform-box: view-box; transform-origin: 10px 10px; transition: transform 0.4s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.2s; }
+.nav[data-open] .bar-1 { transform: rotate(45deg) translateY(4.5px); }
+.nav[data-open] .bar-2 { opacity: 0; }
+.nav[data-open] .bar-3 { transform: rotate(-45deg) translateY(-4.5px); }
 .mobile-menu ul { list-style: none; margin: 0; padding: 20px 0 40px; display: grid; }
 /* Numbers sit centred on their titles. Only Reserve is gold in the phone menu. */
 .mobile-menu a { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); text-decoration: none; }
 .mobile-menu .label { flex: none; white-space: nowrap; }
+/* Space the fixed header used to take in the page flow. */
+body { padding-top: calc(116px + env(safe-area-inset-top, 0px)); }
 @media (max-width: 980px) {
+  body { padding-top: calc(64px + env(safe-area-inset-top, 0px)); }
   .nav-row { align-items: center; padding-block: 12px; }
   .nav-stack { display: none; }
   .nav-burger { display: inline-flex; }
@@ -108,6 +150,8 @@ main [id] { scroll-margin-top: 0; }
 }
 .hero-copy { display: grid; gap: 22px; }
 .hero-copy .hero-lede { color: var(--fg); max-width: none; }
+/* Each sentence stays whole, so a wrap moves a full sentence to the next line. */
+.hero-lede span { white-space: nowrap; }
 .hero-viewer { position: absolute; inset: 0; z-index: 1; }
 @media (min-width: 861px) { .hero-viewer { left: 26%; } }
 @media (max-width: 980px) { .hero-inner { min-height: min(900px, calc(100svh - 64px)); } }
@@ -115,7 +159,7 @@ main [id] { scroll-margin-top: 0; }
    stay fully visible below it within the first screen. */
 @media (max-width: 700px) {
   .hero-inner { min-height: calc(100svh - 64px); padding-block: 24px 28px; }
-  .hero-viewer { inset: 0 0 auto 0; height: 60%; }
+  .hero-viewer { inset: 3% 0 auto 0; height: 70%; }
   .hero-title { font-size: clamp(38px, 11vw, 56px); }
   .hero-copy { gap: 14px; }
 }
@@ -534,3 +578,8 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 
 /* Feature numbers never wrap and stay centred on titles that run to two lines. */
 .rotator-index { flex: none; white-space: nowrap; }
+
+/* Touch screens: a tapped header button doesn't stay stuck in its hover color. */
+@media (hover: none) {
+  .nav-actions .btn-ghost:hover { background: transparent; color: var(--fg); }
+}

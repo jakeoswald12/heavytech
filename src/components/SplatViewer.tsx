@@ -133,7 +133,7 @@ export default function SplatViewer({
             camera.aspect = w / h;
             camera.clearViewOffset();
           }
-          camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.6 : 2.45) * (model.fit ?? 1));
+          camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.25 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
         };
         // Leader-line start points: the inner end of each label's underline, relative to the stage.

@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
 import ScrollReveal from "@/components/ScrollReveal";
 import SmoothScroll from "@/components/SmoothScroll";
-import { revealScript, themeScript } from "@/lib/inline-scripts";
+import { revealScript, scrollTopScript, themeScript } from "@/lib/inline-scripts";
 import { site } from "@/data/site";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${tomorrow.variable} ${martian.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript + revealScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeScript + revealScript + scrollTopScript }} />
       </head>
       <body>
         <a className="skip-link" href="#main">
