@@ -271,10 +271,8 @@ sup a:hover{color:var(--accent)}
   .js-io #chan .score.hl i.on{opacity:0}
   .js-io #chan.in .score.hl i.on{animation:cellfill .4s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(.15s + var(--r,0) * .12s + var(--s,0) * .14s)}
   @keyframes cellfill{0%{opacity:0}55%{opacity:1;filter:brightness(1.35)}100%{opacity:1;filter:none}}
-  @keyframes tagdraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 -2px 0 0)}}
   @supports (animation-timeline: view()){
     :root{--ease:cubic-bezier(.22,.8,.26,1)}
-    .tag{animation:tagdraw linear both;animation-timing-function:var(--ease);animation-timeline:view();animation-range:entry 30% entry 90%}
     /* shared scroll reveal */
     .findings li>*,.rec>*,.panel,.fstep>*,.phase,.tblwrap,.filters,.plain li,.callout,.srcs li,.g3>.panel,
     .persona dl>*,.out>div,.field,.presets,.chk,.keys,.src,.crow,.axis,.unit,.part,footer>*,
@@ -307,8 +305,6 @@ sup a:hover{color:var(--accent)}
       animation:line linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
     @keyframes line{from{transform:scaleX(0)}to{transform:scaleX(1);opacity:0}}
   }
-  .hero .legend-tags .tag{animation:tagdraw .8s cubic-bezier(.22,.8,.26,1) both;animation-timeline:auto;animation-range:normal}
-  .hero .legend-tags>span:nth-child(1) .tag{animation-delay:.75s}.hero .legend-tags>span:nth-child(2) .tag{animation-delay:.85s}.hero .legend-tags>span:nth-child(3) .tag{animation-delay:.95s}
 }
 </style>
 </head>
