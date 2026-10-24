@@ -6,8 +6,8 @@ import type { SplatModel } from "@/data/site";
 type Status = "loading" | "live" | "error";
 
 /**
- * Interactive Gaussian-splat viewer. Shows the studio render as a poster until the
- * splat has loaded, auto-rotates slowly, and pauses rotation while the viewer drags.
+ * Interactive Gaussian-splat viewer. Stays blank until the model is ready, then fades it in (the studio
+ * render only appears if 3D can't run on the device). Auto-rotates slowly and pauses while the viewer drags.
  */
 export default function SplatViewer({
   model,
@@ -148,19 +148,20 @@ export default function SplatViewer({
     };
   }, [model, compact, bare]);
 
-  // The studio render stands in until the 3D model is ready (or if 3D can't run on this device).
-  const showPoster = status !== "live";
+  // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
+  const showPoster = status === "error";
   const statusText = status === "live" ? "Drag to rotate" : status === "loading" ? "Loading 3D model…" : "Studio render";
 
   return (
     <div className={`splat ${bare ? "splat-bare" : ""} ${className}`}>
       <div ref={stageRef} className="splat-stage">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="splat-poster" src={poster} alt={alt} style={{ opacity: showPoster ? 1 : 0 }} />
+        {showPoster ? <img className="splat-poster" src={poster} alt={alt} /> : null}
         <canvas
           ref={canvasRef}
           className="splat-canvas"
           aria-label={`Interactive 3D view: ${alt}. Drag to rotate.`}
+          data-live={status === "live"}
           style={{ visibility: status === "error" ? "hidden" : "visible" }}
         />
       </div>
