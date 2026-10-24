@@ -33,8 +33,10 @@ export type SplatModel = {
   rotY: number;
   scale: number;
   y: number;
-  /** Camera distance multiplier for long machines that need more room (default 1). */
+  /** Camera distance multiplier in large frames (hero, machine page). Lower = bigger. Default 1. */
   fit?: number;
+  /** Camera distance multiplier in machine cards. Lower = bigger. Default 1. */
+  cardFit?: number;
 };
 
 export type Machine = {
@@ -104,7 +106,7 @@ export const machines: Machine[] = [
       { src: "/images/machines/arlo_base218.webp", alt: "ARLO base chassis with boom raised", caption: "Base chassis" },
       { src: "/images/machines/arlo_main.webp", alt: "ARLO power and hydraulic modules", caption: "Power and hydraulic modules" },
     ],
-    model: { src: "/models/arlo.splat", rotX: Math.PI, rotY: Math.PI / 2, scale: 1.25, y: 0.03, fit: 1.3 },
+    model: { src: "/models/arlo.splat", rotX: Math.PI, rotY: Math.PI / 2, scale: 1.25, y: 0.03, fit: 1.3, cardFit: 0.9 },
   },
   {
     slug: "defensex",
