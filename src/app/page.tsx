@@ -1,10 +1,86 @@
 import Link from "next/link";
 import HeroViewer from "@/components/HeroViewer";
+import FeatureRotator, { type Feature } from "@/components/FeatureRotator";
 import NewsCarousel from "@/components/NewsCarousel";
-import PowertrainTabs from "@/components/PowertrainTabs";
-import Reveal from "@/components/Reveal";
-import { MachineCard, Split } from "@/components/blocks";
+import { MachineCard } from "@/components/blocks";
 import { machines, news, site } from "@/data/site";
+
+const technology: Feature[] = [
+  {
+    title: "Software-defined controls",
+    body: "Real-time diagnostics, seamless upgrades and an intuitive operator interface. The machine isolates a problem to a subsystem and tells the technician.",
+    image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
+  },
+  {
+    title: "Machine vision",
+    body: "Camera-based sensing that understands machine state and attachment position without traditional sensors, built for operator assistance and automation.",
+    image: { src: "/images/machines/ctl_main.webp", alt: "HeavyTech HT-1 compact track loader" },
+  },
+  {
+    title: "Autonomy ready",
+    body: "A sensor module mounts front and back of the cab. Add it or remove it to enable autonomous functions on your terms.",
+    image: { src: "/images/machines/defx1.webp", alt: "DefenseX autonomy-ready tracked platform" },
+  },
+  {
+    title: "Swappable power",
+    body: "The front of every machine is the same electric architecture; the back, where the power lives, swaps between battery-electric, hybrid and plug-in hybrid. Pick the energy source the job calls for.",
+    image: { src: "/images/technology/powertrain.webp", alt: "ARLO loader shown transparent, revealing its modular powertrain" },
+  },
+  {
+    title: "Power on demand",
+    body: "A dedicated electric motor drives each work-function pump, so the pump only spins when you’re working and every function gets precise, instant power.",
+    image: { src: "/images/technology/slide2.webp", alt: "Electric motor coupled to a hydraulic pump with its control board" },
+  },
+  {
+    title: "Valveless control",
+    body: "Real-time, high-resolution control of every function without directional or pressure control valves: less energy lost as heat, faster response, simpler diagnostics.",
+    image: { src: "/images/technology/slide3.webp", alt: "Valveless hydraulic manifold" },
+  },
+];
+
+const service: Feature[] = [
+  {
+    title: "Removable panels",
+    body: "Swing-out service doors and panels that come off, so nothing is buried behind something else.",
+    image: { src: "/images/machines/ctl_access.webp", alt: "HT-1 with service panels open showing the power module" },
+  },
+  {
+    title: "Labeled wiring",
+    body: "Clearly labeled harnesses and modular subsystems that can be traced and swapped in the field.",
+    image: { src: "/images/technology/guts.webp", alt: "HeavyTech power module with labeled wiring" },
+  },
+  {
+    title: "Open diagnostics",
+    body: "The machine points the technician to the subsystem. No dealer-only laptop required.",
+    image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
+  },
+  {
+    title: "Standard parts",
+    body: "Commercially available components wherever practical, so parts can be found locally.",
+    image: { src: "/images/technology/slide2.webp", alt: "Commercially available electric motor and pump" },
+  },
+];
+
+const company: Feature[] = [
+  {
+    title: "Northeast Indiana",
+    body: "A region with deep manufacturing roots and the industrial base to build heavy equipment again.",
+    image: { src: "/images/company/expo_move.webp", alt: "HeavyTech team at the MOVE America conference" },
+    kind: "photo",
+  },
+  {
+    title: "Domestic supply",
+    body: "US steel and domestic components, minimizing global dependencies to protect quality and keep the impact local.",
+    image: { src: "/images/company/photo_3331.webp", alt: "CAD model of a HeavyTech track assembly on an engineering workstation" },
+    kind: "photo",
+  },
+  {
+    title: "Partners",
+    body: "We don’t need to invent every component. We work with world-class suppliers and make the parts work together better.",
+    image: { src: "/images/company/expo_ivt.webp", alt: "HeavyTech booth at IVT Expo with scale models of HT-1 and ARLO" },
+    kind: "photo",
+  },
+];
 
 /** Section eyebrow: bracketed index plus name, matching the nav order. */
 function Eyebrow({ n, children }: { n: number; children: React.ReactNode }) {
@@ -36,177 +112,65 @@ export default function Home() {
       </section>
 
       {/* ---------- Machines ---------- */}
-      <section className="section wrap" id="machines">
-        <div className="inner">
-          <div className="section-head">
-            <div className="head-stack">
-              <Eyebrow n={1}>Machines</Eyebrow>
-              <h2 className="display h-l">The machines.</h2>
-            </div>
-            <p className="lede">One architecture across construction, farm, ranch and defense. Drag any machine to turn it.</p>
+      <section className="section section-lineup" id="machines">
+        <div className="wrap">
+          <div className="inner head-stack lineup-head">
+            <Eyebrow n={1}>Machines</Eyebrow>
+            <h2 className="display h-l">The lineup.</h2>
           </div>
-          <div className="machines-grid">
-            {machines.map((m, i) => (
-              <MachineCard key={m.slug} m={m} index={i} />
-            ))}
-          </div>
+        </div>
+        <div className="machines-grid">
+          {machines.map((m, i) => (
+            <MachineCard key={m.slug} m={m} index={i} />
+          ))}
         </div>
       </section>
 
       {/* ---------- Technology ---------- */}
-      <div id="technology">
-        <section className="section wrap ticks">
-          <div className="inner statement-grid">
-            <Reveal className="statement-grid">
-              <Eyebrow n={2}>Technology</Eyebrow>
-              <h2 className="display h-l">A new architecture.</h2>
-            </Reveal>
-            <div className="fgrid fgrid-3">
-              <div>
-                <h3 className="display h-s">Software-defined controls</h3>
-                <p>Real-time diagnostics, seamless upgrades and an intuitive operator interface. The machine isolates a problem to a subsystem and tells the technician.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Machine vision</h3>
-                <p>Camera-based sensing that understands machine state and attachment position without traditional sensors, built for operator assistance and automation.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Autonomy ready</h3>
-                <p>A sensor module mounts front and back of the cab. Add it or remove it to enable autonomous functions on your terms.</p>
-              </div>
-            </div>
+      <section className="feature-section wrap" id="technology">
+        <div className="inner feature-inner">
+          <div className="head-stack">
+            <Eyebrow n={2}>Technology</Eyebrow>
+            <h2 className="display h-l one-line">A new architecture.</h2>
           </div>
-        </section>
-
-        <Split
-          label="Interchangeable powertrain"
-          title="Swappable power."
-          image={{ src: "/images/technology/powertrain.webp", alt: "ARLO loader shown transparent, revealing its modular powertrain" }}
-        >
-          <p>
-            The front of every HeavyTech machine is the same electric architecture. The back, where the power source lives,
-            swaps out. Pick the energy source the job calls for, and change it when the job changes.
-          </p>
-          <PowertrainTabs />
-        </Split>
-
-        <Split
-          joined
-          flip
-          label="Electro-hydraulics · Patent pending"
-          title="Power on demand."
-          image={{ src: "/images/technology/slide2.webp", alt: "Electric motor coupled to a hydraulic pump with its control board" }}
-        >
-          <p>
-            A dedicated electric motor drives each work-function pump. No directional or pressure control valves burning energy
-            as heat, so every function gets precise, instant, digitally controlled power, and the pump only spins when you’re
-            working.
-          </p>
-        </Split>
-
-        <Split
-          joined
-          label="Digital hydraulics"
-          title="Valveless control."
-          image={{ src: "/images/technology/slide3.webp", alt: "Valveless hydraulic manifold" }}
-        >
-          <p>
-            Real-time, high-resolution control of every vehicle function without directional or pressure control valves. Fewer
-            parts in the hydraulic circuit means less energy lost, faster response and simpler diagnostics.
-          </p>
-        </Split>
-      </div>
+          <FeatureRotator features={technology} label="Technology features" />
+        </div>
+      </section>
 
       {/* ---------- Service ---------- */}
-      <div id="service">
-        <Split
-          label="[ 03 ] Service"
-          title="Right to repair."
-          image={{ src: "/images/machines/ctl_access.webp", alt: "HT-1 with service panels open showing the power module" }}
-          extra={
-            <div className="point-grid">
-              <div>
-                <h3 className="display h-s">Removable panels</h3>
-                <p>Swing-out service doors and panels that come off, so nothing is buried behind something else.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Labeled wiring</h3>
-                <p>Clearly labeled harnesses and modular subsystems that can be traced and swapped in the field.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Open diagnostics</h3>
-                <p>The machine points the technician to the subsystem. No dealer-only laptop required.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Standard parts</h3>
-                <p>Commercially available components wherever practical, so parts can be found locally.</p>
-              </div>
-            </div>
-          }
-        >
-          <p>
-            The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and full
-            service documentation let operators, fleet mechanics and independent shops keep the machine working without
-            proprietary tools.
-          </p>
-        </Split>
-      </div>
-
-      {/* ---------- News ---------- */}
-      <section className="section wrap" id="news">
-        <div className="inner">
-          <NewsCarousel
-            items={news}
-            title={
-              <div className="head-stack">
-                <Eyebrow n={4}>News</Eyebrow>
-                <h2 className="display h-l">Field notes.</h2>
-              </div>
-            }
-          />
+      <section className="feature-section wrap" id="service">
+        <div className="inner feature-inner">
+          <div className="head-stack">
+            <Eyebrow n={3}>Service</Eyebrow>
+            <h2 className="display h-l one-line">Right to repair.</h2>
+            <p className="lede">
+              The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and
+              full service documentation let operators, fleet mechanics and independent shops keep the machine working without
+              proprietary tools.
+            </p>
+          </div>
+          <FeatureRotator features={service} label="Service features" />
         </div>
       </section>
 
       {/* ---------- Company ---------- */}
       <div id="company">
-        <section className="section wrap ticks">
-          <div className="inner">
-            <div className="split">
-              <Reveal className="split-copy">
-                <Eyebrow n={5}>Company</Eyebrow>
-                <h2 className="display h-m">Made in the Midwest.</h2>
-              </Reveal>
-              <Reveal className="prose" delay={0.1}>
-                <p>
-                  HeavyTech was founded by industry experts, engineers and stakeholders who saw an industry overdue for a new
-                  approach. Our mission is simple: design and build powerful, high-performance machines that are affordable and
-                  practical to own.
-                </p>
-                <p>
-                  Large manufacturers have enormous investments in existing platforms, factories and supply chains. A startup gets
-                  a blank sheet: whether a hydraulic function should still be powered the same way, whether mechanical complexity
-                  can become digital control, whether the machine can diagnose itself.
-                </p>
-              </Reveal>
+        <section className="feature-section wrap">
+          <div className="inner feature-inner">
+            <div className="head-stack">
+              <Eyebrow n={4}>Company</Eyebrow>
+              <h2 className="display h-l one-line">Made in the Midwest.</h2>
+              <p className="lede">
+                HeavyTech was founded by industry experts and engineers who saw an industry overdue for a new approach: powerful,
+                high-performance machines that are affordable and practical to own, designed from a blank sheet and built in Fort
+                Wayne, Indiana.
+              </p>
             </div>
-            <div className="fgrid fgrid-3">
-              <div>
-                <h3 className="display h-s">Northeast Indiana</h3>
-                <p>A region with deep manufacturing roots and the industrial base to build heavy equipment again.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Domestic supply</h3>
-                <p>US steel and domestic components, minimizing global dependencies to protect quality and keep the impact local.</p>
-              </div>
-              <div>
-                <h3 className="display h-s">Partners</h3>
-                <p>We don’t need to invent every component. We work with world-class suppliers and make the parts work together better.</p>
-              </div>
-            </div>
+            <FeatureRotator features={company} label="Company" />
           </div>
         </section>
 
-        <section className="section wrap ticks join">
+        <section className="section wrap join">
           <div className="inner join-grid">
             <span className="label">Reservations · Dealers · Investors</span>
             <h2 className="display h-l">Join the build.</h2>
@@ -225,6 +189,21 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* ---------- News ---------- */}
+      <section className="section wrap" id="news">
+        <div className="inner">
+          <NewsCarousel
+            items={news}
+            title={
+              <div className="head-stack">
+                <Eyebrow n={5}>News</Eyebrow>
+                <h2 className="display h-l">Field notes.</h2>
+              </div>
+            }
+          />
+        </div>
+      </section>
     </>
   );
 }

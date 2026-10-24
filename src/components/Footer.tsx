@@ -36,6 +36,9 @@ export default function Footer() {
                 </li>
               ))}
             <li>
+              <Link href="/#news">News</Link>
+            </li>
+            <li>
               <Link href="/reserve/">Reserve</Link>
             </li>
             <li>

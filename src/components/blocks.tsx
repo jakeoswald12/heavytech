@@ -7,7 +7,7 @@ import SplatViewer from "./SplatViewer";
 /** Top-of-page header for inner pages. */
 export function PageHeader({ label, title, lede, children }: { label: string; title: ReactNode; lede?: ReactNode; children?: ReactNode }) {
   return (
-    <section className="page-head wrap ticks">
+    <section className="page-head wrap">
       <div className="inner page-head-grid">
         <span className="label">{label}</span>
         <h1 className="display h-xl">{title}</h1>
@@ -99,7 +99,7 @@ export function MachineCard({ m, index }: { m: Machine; index: number }) {
 /** Closing call to action used at the bottom of most pages. */
 export function JoinBand() {
   return (
-    <section className="section wrap ticks join">
+    <section className="section wrap join">
       <div className="inner join-grid">
         <span className="label">Reservations · Dealers · Investors</span>
         <h2 className="display h-l">Join the build.</h2>

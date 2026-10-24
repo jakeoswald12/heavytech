@@ -58,7 +58,7 @@ export default async function MachinePage({ params }: PageProps<"/machines/[slug
         </div>
       </section>
 
-      <section className="section wrap ticks">
+      <section className="section wrap">
         <div className="inner split">
           <Reveal className="split-copy">
             <span className="label">Overview</span>

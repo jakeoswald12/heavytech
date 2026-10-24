@@ -50,7 +50,7 @@ export default function ReservePage() {
           </dl>
         </div>
       </section>
-      <section className="section wrap ticks" id="investors">
+      <section className="section wrap" id="investors">
         <div className="inner split">
           <div className="split-copy">
             <span className="label">[ 03 ] Investors</span>

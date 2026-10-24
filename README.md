@@ -33,10 +33,10 @@ npm run build      # writes the static site to out/
 
 ```
 src/
-  app/                 routes: / (single page: Home, Machines, Technology, Service, News, Company), /machines/[slug], /reserve
+  app/                 routes: / (single page: Home, Machines, Technology, Service, Company, News), /machines/[slug], /reserve
     globals.css        design tokens (colors, type, grain) and base styles
     components.css     component styles
-  components/          Nav (vertical section nav), Footer, SplatViewer (3D), NewsCarousel, PowertrainTabs, ReserveForm, shared blocks
+  components/          Nav (vertical section nav), Footer, SplatViewer (3D), NewsCarousel, FeatureRotator, ReserveForm, shared blocks
   data/site.ts         all machine, powertrain and news content in one place
 public/
   images/              optimized renders and photos (WebP)

@@ -25,7 +25,6 @@ export const nav = [
   { id: "machines", label: "Machines" },
   { id: "technology", label: "Technology" },
   { id: "service", label: "Service" },
-  { id: "news", label: "News" },
   { id: "company", label: "Company" },
 ];
 

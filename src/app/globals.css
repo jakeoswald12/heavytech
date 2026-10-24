@@ -163,18 +163,6 @@ p { margin: 0; }
 }
 .tag-hot { border-color: var(--accent); color: var(--accent); }
 
-/* "+" corner ticks on major sections */
-.ticks { position: relative; }
-.ticks::before, .ticks::after {
-  content: "+";
-  position: absolute;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1;
-  color: var(--fg-2);
-}
-.ticks::before { top: 14px; left: max(var(--gutter), env(safe-area-inset-left, 0px)); }
-.ticks::after { bottom: 14px; right: max(var(--gutter), env(safe-area-inset-right, 0px)); }
 
 /* product renders sit on the page with a soft shadow */
 .render { display: block; width: 100%; height: auto; filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.35)); }
