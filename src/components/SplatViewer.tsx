@@ -78,7 +78,7 @@ export default function SplatViewer({
           const h = stage.clientHeight;
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
-          camera.position.setLength(w < 700 || compact ? 3.1 : 2.45);
+          camera.position.setLength((compact ? 1.9 : w < 700 ? 3.1 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
         };
         size();
