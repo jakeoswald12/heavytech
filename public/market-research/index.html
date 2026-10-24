@@ -238,6 +238,25 @@ footer{border-top:1px solid var(--rule);padding-block:28px 48px;padding-left:var
 sup a{color:var(--muted);font-size:9.5px;text-decoration:none;margin-left:1px}
 sup a:hover{color:var(--accent)}
 .callout{border-left:2px solid var(--accent);padding:4px 0 4px 16px;margin-top:20px;max-width:72ch}
+
+/* Motion: hero rises on load; content eases in as it scrolls into view (scroll-driven, so at rest everything is fully visible). */
+@media (prefers-reduced-motion:no-preference){
+  .hero .meta,.hero h1,.hero-sub{animation:rise 1.1s cubic-bezier(.16,.84,.24,1) both}
+  .hero h1{animation-delay:.12s}.hero-sub{animation-delay:.3s}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @supports (animation-timeline: view()){
+    .shead,.findings li,.rec,.panel,.fstep,.phases,.tblwrap,.filters,.plain li,.callout,.srcs li{
+      animation:reveal linear both;animation-timing-function:cubic-bezier(.22,.8,.26,1);
+      animation-timeline:view();animation-range:entry 0% entry 60%}
+    @keyframes reveal{from{opacity:.12;transform:translateY(26px)}to{opacity:1;transform:none}}
+    .track .b,.track .rg{transform-origin:left center;animation:grow linear both;animation-timing-function:cubic-bezier(.22,.8,.26,1);
+      animation-timeline:view();animation-range:entry 20% cover 40%}
+    @keyframes grow{from{transform:scaleX(.04)}to{transform:none}}
+    svg.lc polyline{stroke-dasharray:1200;animation:draw linear both;animation-timeline:view();animation-range:entry 10% cover 45%}
+    svg.lc .s2{stroke-dasharray:4 3;animation:none}
+    @keyframes draw{from{stroke-dashoffset:1200}to{stroke-dashoffset:0}}
+  }
+}
 </style>
 </head>
 <body>
