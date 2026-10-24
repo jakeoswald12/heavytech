@@ -71,7 +71,7 @@ export const ht1Annotations: Annotation[] = [
     normal: [0, -1, 0],
   },
   {
-    title: "Electro-hydraulic lift arms",
+    title: "Electro-hydraulic arm",
     text: "A dedicated electric motor and pump for each function.",
     slot: "right-2",
     anchor: [0.268, -0.029, -0.094],

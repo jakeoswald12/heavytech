@@ -472,12 +472,12 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 .anno-front { z-index: 2; }
 .anno-lines line { stroke: var(--fg-2); stroke-width: 1; }
 .anno-lines circle { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }
-.anno-back line { stroke-dasharray: 3 3; }
+.anno-lines g { transition: opacity 0.5s ease; }
 .anno-labels { position: absolute; inset: 0; z-index: 3; list-style: none; margin: 0; padding: 0; pointer-events: none; opacity: 0; transition: opacity 0.8s ease 0.3s; }
 .anno-labels[data-live="true"] { opacity: 1; }
 .anno { position: absolute; }
 .anno-left { left: -6%; top: 14%; }
-.anno-right-1 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 40px); top: 4%; }
+.anno-right-1 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 60px); top: 4%; }
 .anno-right-2 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 40px); top: 19%; }
 /* Callouts are quiet: title only until hovered (or clicked to pin open). */
 .anno-box {

@@ -20,6 +20,7 @@ export default function SplatViewer({
   showStatus = !bare,
   annotations = NO_ANNOTATIONS,
   bleed = 0,
+  startAngle = 0,
 }: {
   model: SplatModel;
   poster: string;
@@ -38,6 +39,8 @@ export default function SplatViewer({
    * low isn't cropped. The model keeps exactly the same size and position as without bleed.
    */
   bleed?: number;
+  /** Rotate the starting camera position around the model (radians; negative turns the view right). */
+  startAngle?: number;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -99,7 +102,7 @@ export default function SplatViewer({
           if (spin) idle = setTimeout(() => (controls.autoRotate = true), 3500);
         });
 
-        camera.position.set(1.55, 0.75, 1.65);
+        camera.position.set(1.55, 0.75, 1.65).applyAxisAngle(new THREE.Vector3(0, 1, 0), startAngle);
         // Cards aim slightly low so the machine sits centered in its frame instead of running off the bottom.
         controls.target.set(0, bare ? -0.05 : 0, 0);
         const BASE_FOV = 32;
@@ -133,7 +136,9 @@ export default function SplatViewer({
           starts = annotations.map((a, i) => {
             const r = labelRefs.current[i]?.getBoundingClientRect();
             if (!r) return { x: 0, y: 0 };
-            return { x: (a.slot === "left" ? r.right : r.left) - s.left, y: r.bottom - s.top };
+            // The underline is the box's 1px bottom border; aim for its centre line (bottom - 0.5px),
+            // not the box's outer edge, so the leader line meets it exactly.
+            return { x: (a.slot === "left" ? r.right : r.left) - s.left, y: r.bottom - s.top - 0.5 };
           });
         };
         size();
@@ -180,7 +185,8 @@ export default function SplatViewer({
               [backRefs.current[i], !facing],
             ] as const) {
               if (!g) continue;
-              g.style.display = show ? "" : "none";
+              // Crossfade between the front and back layers rather than snapping (see .anno-lines g).
+              g.style.opacity = show ? "1" : "0";
               const line = g.querySelector("line");
               const dot = g.querySelector("circle");
               line?.setAttribute("x1", String(s.x));
@@ -238,7 +244,7 @@ export default function SplatViewer({
       near?.disconnect();
       cleanup();
     };
-  }, [model, compact, bare, annotations, bleed]);
+  }, [model, compact, bare, annotations, bleed, startAngle]);
 
   // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
   const showPoster = status === "error";
@@ -252,7 +258,7 @@ export default function SplatViewer({
         {annotations.length ? (
           <svg className="anno-lines anno-back" aria-hidden="true" data-live={status === "live"}>
             {annotations.map((a, i) => (
-              <g key={a.title} ref={(el) => void (backRefs.current[i] = el)} style={{ display: "none" }}>
+              <g key={a.title} ref={(el) => void (backRefs.current[i] = el)} style={{ opacity: 0 }}>
                 <line />
                 <circle r="3" />
               </g>
@@ -270,7 +276,7 @@ export default function SplatViewer({
           <>
             <svg className="anno-lines anno-front" aria-hidden="true" data-live={status === "live"}>
               {annotations.map((a, i) => (
-                <g key={a.title} ref={(el) => void (frontRefs.current[i] = el)} style={{ display: "none" }}>
+                <g key={a.title} ref={(el) => void (frontRefs.current[i] = el)} style={{ opacity: 0 }}>
                   <line />
                   <circle r="3" />
                 </g>
