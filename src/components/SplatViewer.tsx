@@ -72,13 +72,14 @@ export default function SplatViewer({
         });
 
         camera.position.set(1.55, 0.75, 1.65);
-        controls.target.set(0, 0, 0);
+        // Cards aim slightly low so the machine sits centered in its frame instead of running off the bottom.
+        controls.target.set(0, bare ? -0.05 : 0, 0);
         const size = () => {
           const w = stage.clientWidth;
           const h = stage.clientHeight;
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
-          camera.position.setLength(bare ? 2.3 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.1 : 2.45) * (model.fit ?? 1));
+          camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.1 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
         };
         size();
