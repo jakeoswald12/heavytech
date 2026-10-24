@@ -62,7 +62,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .nav{display:flex;overflow-x:auto;scrollbar-width:none;min-width:0;border-left:1px solid var(--rule)}
 .nav::-webkit-scrollbar{display:none}
 .nav a{display:flex;align-items:center;padding:0 16px;height:52px;border-right:1px solid var(--rule);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-decoration:none;white-space:nowrap}
+.nav a{transition:color .35s ease,box-shadow .35s ease,background-color .25s ease}
 .nav a:hover{color:var(--fg);background:var(--panel)}
+.nav a[aria-current="true"]{color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
+.bar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--accent);transform:scaleX(var(--p,0));transform-origin:left center;pointer-events:none}
 .theme{margin-left:auto;align-self:center;flex:none;display:inline-flex;border:1px solid var(--rule);border-radius:3px;padding:2px;background:none;cursor:pointer;gap:2px}
 .theme span{display:grid;place-items:center;width:28px;height:24px;border-radius:2px;color:var(--muted)}
 .theme span[data-on="true"]{background:var(--accent);color:var(--accent-ink)}
@@ -152,6 +155,8 @@ svg.lc .lab{fill:var(--fg)}
 .fstep{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;border-top:1px solid var(--rule);padding-block:20px;align-items:center}
 .fbar{height:56px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:clamp(18px,2.4vw,28px);letter-spacing:-.02em;color:var(--fg);background:var(--gray3);border:1px solid var(--gray2);text-align:center;padding:0 10px;white-space:nowrap}
 .fbar.hl{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#c_tco .track .b{transition:width .6s cubic-bezier(.22,.8,.26,1),transform 1.8s cubic-bezier(.22,.8,.26,1) calc(.15s + var(--r,0) * .14s)}
+#somBar{transition:width .8s cubic-bezier(.22,.8,.26,1)}
 .fstep h3{margin-bottom:8px}
 .fstep ul{margin:8px 0 0;padding-left:16px;color:var(--muted);font-size:11.25px}
 @media (max-width:720px){.fstep{grid-template-columns:1fr}}
@@ -229,9 +234,10 @@ tr.ht td{background:color-mix(in srgb,var(--accent) 8%,transparent)}
 .srcs{columns:2 360px;column-gap:40px;font-size:10.8px;margin:0;padding:0;list-style:none;counter-reset:s}
 .srcs li{break-inside:avoid;padding-block:7px;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px}
 .srcs li::before{counter-increment:s;content:"[" counter(s) "]";color:var(--muted);font-size:11px}
-.srcs a{text-decoration:none}
-.srcs a::after{content:" ↗";color:var(--accent)}
-.srcs a:hover{text-decoration:underline}
+.srcs a{text-decoration:none;background:linear-gradient(var(--accent),var(--accent)) 0 100%/0 1px no-repeat;transition:background-size .5s cubic-bezier(.22,.8,.26,1)}
+.srcs a::after{content:"↗";display:inline-block;margin-left:.45em;color:var(--accent);transition:transform .35s cubic-bezier(.22,.8,.26,1)}
+.srcs a:hover,.srcs a:focus-visible{background-size:100% 1px}
+.srcs a:hover::after,.srcs a:focus-visible::after{transform:translate(2px,-2px)}
 .srcs small{display:block;color:var(--muted);font-size:10.5px}
 
 footer{border-top:1px solid var(--rule);padding-block:28px 48px;padding-left:var(--gutL);padding-right:var(--gutR);display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
@@ -265,8 +271,10 @@ sup a:hover{color:var(--accent)}
   .js-io #chan .score.hl i.on{opacity:0}
   .js-io #chan.in .score.hl i.on{animation:cellfill .4s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(.15s + var(--r,0) * .12s + var(--s,0) * .14s)}
   @keyframes cellfill{0%{opacity:0}55%{opacity:1;filter:brightness(1.35)}100%{opacity:1;filter:none}}
+  @keyframes tagdraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 -2px 0 0)}}
   @supports (animation-timeline: view()){
     :root{--ease:cubic-bezier(.22,.8,.26,1)}
+    .tag{animation:tagdraw linear both;animation-timing-function:var(--ease);animation-timeline:view();animation-range:entry 30% entry 90%}
     /* shared scroll reveal */
     .findings li>*,.rec>*,.panel,.fstep>*,.phase,.tblwrap,.filters,.plain li,.callout,.srcs li,.g3>.panel,
     .persona dl>*,.out>div,.field,.presets,.chk,.keys,.src,.crow,.axis,.unit,.part,footer>*,
@@ -299,6 +307,8 @@ sup a:hover{color:var(--accent)}
       animation:line linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
     @keyframes line{from{transform:scaleX(0)}to{transform:scaleX(1);opacity:0}}
   }
+  .hero .legend-tags .tag{animation:tagdraw .8s cubic-bezier(.22,.8,.26,1) both;animation-timeline:auto;animation-range:normal}
+  .hero .legend-tags>span:nth-child(1) .tag{animation-delay:.75s}.hero .legend-tags>span:nth-child(2) .tag{animation-delay:.85s}.hero .legend-tags>span:nth-child(3) .tag{animation-delay:.95s}
 }
 </style>
 </head>
@@ -447,7 +457,7 @@ sup a:hover{color:var(--accent)}
         <ul><li>Rental fleets serving California, NY and urban zero-emission or noise-limited jobs</li><li>Municipal and utility fleets with emissions targets</li><li>Indoor, barn and demolition work</li><li>Owner-operators and farms that care most about repair independence</li></ul></div>
     </div>
     <div class="fstep">
-      <div class="fbar hl" style="width:16%;min-width:220px">SOM · $5–100M (yr 5)</div>
+      <div class="fbar hl" id="somBar" style="width:16%;min-width:200px">SOM · ≈$30M</div>
       <div><h3>Obtainable by year five</h3><p class="muted" style="font-size:11.7px">Scenario units in year 5 at about $100k ASP, plus engineering and licensing revenue. <span class="tag e">E·L</span></p>
         <div class="filters" style="margin-top:10px" role="group" aria-label="SOM scenario">
           <button class="chip" data-som="c" aria-pressed="false" type="button">Conservative</button>
@@ -748,6 +758,24 @@ paintToggle();
 /* one-shot chart entrance */
 const motionOK=matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window;
 if(motionOK) root.classList.add('js-io');
+const EASE='cubic-bezier(.22,.8,.26,1)';
+/* roll a number inside text to its new value; cross-fade when the text changes shape */
+function roll(el,txt){
+  if(!el||el.textContent===txt) return;
+  if(!motionOK){el.textContent=txt;return;}
+  const re=/\d[\d,]*(?:\.\d+)?/, mo=el.textContent.match(re), mn=txt.match(re);
+  cancelAnimationFrame(el._r);
+  if(mo&&mn&&el.textContent.replace(re,'#')===txt.replace(re,'#')){
+    const a=parseFloat(mo[0].replace(/,/g,'')), b=parseFloat(mn[0].replace(/,/g,'')), dec=(mn[0].split('.')[1]||'').length, t0=performance.now();
+    const step=t=>{const k=Math.min(1,(t-t0)/480), e=1-Math.pow(1-k,3);
+      el.textContent=k<1?txt.replace(re,(a+(b-a)*e).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec})):txt;
+      if(k<1) el._r=requestAnimationFrame(step);};
+    el._r=requestAnimationFrame(step);
+  } else {
+    el.textContent=txt;
+    el.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:340,easing:EASE});
+  }
+}
 /* horizontal bar chart */
 function bars(el,rows,max,ticks,fmtV){
   const c=$(el); let h='';
@@ -809,9 +837,18 @@ const SOM={
   b:{u:300,rev:'≈$30M',nre:'$1–3M',note:'One regional rental partner (100–150 units/yr), 3–4 dealers/service partners (≈80), direct municipal and fleet sales (≈70). Hybrid priced within ~25% of diesel.',share:'≈0.5%'},
   a:{u:1000,rev:'≈$100M',nre:'$3–5M',note:'A national rental company adopts the HT-1 for zero-emission and noise-limited jobs, plus an OEM license. Requires substantial outside capital.',share:'≈1.8%'}
 };
-function som(k){const s=SOM[k];
-  $('#somOut').innerHTML=`<div class="out" style="margin-top:4px"><div><div class="k">Units in year 5</div><div class="v ${k==='b'?'y':''} num">${fmt(s.u)}</div></div><div><div class="k">Machine revenue</div><div class="v num">${s.rev}</div></div><div><div class="k">NRE / license</div><div class="v num">${s.nre}</div></div></div><p class="muted" style="font-size:10.8px;margin-top:10px">${s.note} Share of today's ~56k US financed CTLs: ${s.share}. <span class="tag e">E·L</span></p>`;
-  $$('[data-som]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.som===k));}
+const SOMW={c:'9%',b:'16%',a:'27%'};
+let somFirst=true;
+function som(k){
+  const s=SOM[k], out=$('#somOut');
+  $$('[data-som]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.som===k));
+  $('#somBar').style.width=SOMW[k]; roll($('#somBar'),'SOM · '+s.rev);
+  const paint=()=>{somPaint(k);};
+  if(somFirst||!motionOK){somFirst=false;paint();return;}
+  out.animate([{opacity:1},{opacity:0,transform:'translateY(-4px)'}],{duration:160,easing:'ease-in'}).onfinish=()=>{paint();out.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:380,easing:EASE});};
+}
+function somPaint(k){const s=SOM[k];
+  $('#somOut').innerHTML=`<div class="out" style="margin-top:4px"><div><div class="k">Units in year 5</div><div class="v ${k==='b'?'y':''} num">${fmt(s.u)}</div></div><div><div class="k">Machine revenue</div><div class="v num">${s.rev}</div></div><div><div class="k">NRE / license</div><div class="v num">${s.nre}</div></div></div><p class="muted" style="font-size:10.8px;margin-top:10px">${s.note} Share of today's ~56k US financed CTLs: ${s.share}. <span class="tag e">E·L</span></p>`;}
 $$('[data-som]').forEach(b=>b.addEventListener('click',()=>som(b.dataset.som)));
 som('b');
 
@@ -827,10 +864,14 @@ function tco(){
   const D=v('pd')+ad*y, Hy=v('ph')+ah*y, B=pb+ab*y;
   const top=Math.ceil(Math.max(D,Hy,B)*1.05/100000)*100000;
   const tk=[0,top/2,top].map(t=>'$'+Math.round(t/1000)+'k');
-  bars('#c_tco',[{l:'Diesel',v:D},{l:'Hybrid',v:Hy,hl:1},{l:'Battery-electric',v:B}],top,tk,r=>'$'+fmt(Math.round(r.v/1000))+'k');
+  const tr=[{l:'Diesel',v:D},{l:'Hybrid',v:Hy,hl:1},{l:'Battery-electric',v:B}], tf=r=>'$'+fmt(Math.round(r.v/1000))+'k', tc=$('#c_tco');
+  if(tc.querySelector('.crow')){
+    tc.querySelectorAll('.crow').forEach((row,i)=>{row.querySelector('.b').style.width=(tr[i].v/top*100)+'%';roll(row.querySelector('.cv'),tf(tr[i]));});
+    tc.querySelectorAll('.ax span').forEach((sp,i)=>roll(sp,tk[i]));
+  } else bars('#c_tco',tr,top,tk,tf);
   const pay=(p,a)=>{const prem=p-v('pd'),sav=ad-a; if(prem<=0) return 'Day 1'; if(sav<=0) return 'Never'; const yr=prem/sav; return yr>25?'25+ yr':yr.toFixed(1)+' yr';};
-  $('#o_ph').textContent=pay(v('ph'),ah); $('#o_pb').textContent=pay(pb,ab);
-  const best=[['Diesel',D],['Hybrid',Hy],['BEV',B]].sort((a,b)=>a[1]-b[1])[0][0]; $('#o_best').textContent=best;
+  roll($('#o_ph'),pay(v('ph'),ah)); roll($('#o_pb'),pay(pb,ab));
+  const best=[['Diesel',D],['Hybrid',Hy],['BEV',B]].sort((a,b)=>a[1]-b[1])[0][0]; roll($('#o_best'),best);
   $('#o_note').textContent=`Annual running cost at ${fmt(h)} h: diesel $${fmt(Math.round(ad))}, hybrid $${fmt(Math.round(ah))}, battery-electric $${fmt(Math.round(ab))}.`;
 }
 ids.forEach(i=>$('#t_'+i).addEventListener('input',()=>{ if(i==='hours') $('#t_hours_r').value=v('hours'); tco(); $$('[data-h]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.h==String(v('hours'))));}));
@@ -878,9 +919,18 @@ const ptLab={bev:'<span class="pill bev">Battery</span>',hyb:'<span class="pill 
 const tb=$('#matrix tbody');
 tb.innerHTML=M.map(r=>`<tr data-type="${r[0]}" data-pt="${r[1]}" class="${r[11]?'ht':''}"><td class="co">${r[2]}</td><td>${r[3]}</td><td>${ptLab[r[1]]}<br><span class="muted" style="font-size:11px">${r[4]}</span></td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td style="white-space:nowrap">${r[10].map(n=>`<sup><a href="#s${n}">${n}</a></sup>`).join(' ')}</td></tr>`).join('');
 const st={type:'all',pt:'all'};
-function filt(){let n=0;$$('#matrix tbody tr').forEach(tr=>{const ok=(st.type==='all'||tr.dataset.type===st.type)&&(st.pt==='all'||tr.dataset.pt===st.pt);tr.hidden=!ok;if(ok)n++;});$('#mCount').textContent=n+' of '+M.length+' shown';}
-$$('[data-f]').forEach(b=>b.addEventListener('click',()=>{st[b.dataset.f]=b.dataset.v;$$(`[data-f="${b.dataset.f}"]`).forEach(x=>x.setAttribute('aria-pressed',x===b));filt();}));
-filt();
+const okRow=tr=>(st.type==='all'||tr.dataset.type===st.type)&&(st.pt==='all'||tr.dataset.pt===st.pt);
+function filt(anim){
+  const rows=$$('#matrix tbody tr'), show=[], hide=[]; let n=0;
+  rows.forEach(tr=>{const ok=okRow(tr); if(ok){n++; if(tr.hidden) show.push(tr);} else if(!tr.hidden) hide.push(tr);});
+  roll($('#mCount'),n+' of '+M.length+' shown');
+  if(!anim||!motionOK){rows.forEach(tr=>tr.hidden=!okRow(tr));return;}
+  hide.forEach(tr=>{tr.animate([{opacity:1},{opacity:0,transform:'translateX(-10px)'}],{duration:200,easing:'ease-in'}).onfinish=()=>{if(!okRow(tr)) tr.hidden=true;};});
+  setTimeout(()=>show.forEach((tr,i)=>{if(!okRow(tr)) return; tr.hidden=false;
+    tr.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:440,delay:i*40,easing:EASE,fill:'backwards'});}),hide.length?200:0);
+}
+$$('[data-f]').forEach(b=>b.addEventListener('click',()=>{st[b.dataset.f]=b.dataset.v;$$(`[data-f="${b.dataset.f}"]`).forEach(x=>x.setAttribute('aria-pressed',x===b));filt(true);}));
+filt(false);
 
 /* channel table */
 const sc=(n,hl,r)=>`<span class="score${hl?' hl':''}" style="--r:${r}">${[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}" style="--s:${i-1}"></i>`).join('')}</span>`;
@@ -894,6 +944,25 @@ const C=[
  ['Fit for HeavyTech now',[1,''],[3,''],[4,''],[4,''],[5,'Recommended']]
 ];
 $('#chan tbody').innerHTML=C.map((r,ri)=>`<tr><td class="co">${r[0]}</td>${r.slice(1).map((c,i)=>`<td>${sc(c[0],i===4,ri)}<br><span class="muted" style="font-size:11px">${c[1]}</span></td>`).join('')}</tr>`).join('');
+
+/* reading position: progress line + current section */
+(function(){
+  const bar=$('.bar'), nav=$('.nav'), links=$$('.nav a'), secs=links.map(a=>document.getElementById(a.getAttribute('href').slice(1)));
+  let cur=-1, tick=false;
+  function upd(){
+    tick=false;
+    const max=document.documentElement.scrollHeight-innerHeight;
+    bar.style.setProperty('--p',max>0?Math.min(1,scrollY/max).toFixed(4):0);
+    const line=bar.getBoundingClientRect().bottom+innerHeight*.25; let idx=-1;
+    secs.forEach((sec,i)=>{if(sec&&sec.getBoundingClientRect().top<=line) idx=i;});
+    if(scrollY>=max-2) idx=secs.length-1;
+    if(idx!==cur){cur=idx; links.forEach((a,i)=>a.setAttribute('aria-current',String(i===idx)));
+      const a=links[idx]; if(a){const l=a.offsetLeft-nav.offsetLeft, r=l+a.offsetWidth;
+        if(l<nav.scrollLeft||r>nav.scrollLeft+nav.clientWidth) nav.scrollTo({left:Math.max(0,l-24),behavior:motionOK?'smooth':'auto'});}}
+  }
+  addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(upd);}},{passive:true});
+  addEventListener('resize',upd); upd();
+})();
 
 /* sources */
 const S=[
