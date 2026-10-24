@@ -443,3 +443,35 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
   .rotator { grid-template-columns: 1fr; }
   .rotator-media { order: -1; aspect-ratio: 4 / 3; }
 }
+
+/* ---------- CAD-style callouts on the hero model ---------- */
+.splat-canvas { z-index: 1; }
+.anno-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; opacity: 0; transition: opacity 0.8s ease 0.3s; }
+.anno-lines[data-live="true"] { opacity: 1; }
+.anno-back { z-index: 0; }  /* under the canvas: the model's own pixels cover these lines */
+.anno-front { z-index: 2; }
+.anno-lines line { stroke: var(--fg-2); stroke-width: 1; }
+.anno-lines circle { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }
+.anno-back line { stroke-dasharray: 3 3; }
+.anno-labels { position: absolute; inset: 0; z-index: 3; list-style: none; margin: 0; padding: 0; pointer-events: none; opacity: 0; transition: opacity 0.8s ease 0.3s; }
+.anno-labels[data-live="true"] { opacity: 1; }
+.anno { position: absolute; }
+.anno-left { left: 2%; top: 14%; }
+.anno-right-1 { right: max(var(--gutter), env(safe-area-inset-right, 0px)); top: 4%; }
+.anno-right-2 { right: max(var(--gutter), env(safe-area-inset-right, 0px)); top: 19%; }
+.anno-box {
+  display: grid;
+  gap: 4px;
+  max-width: 240px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--fg-2);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+.anno-right-1 .anno-box, .anno-right-2 .anno-box { text-align: right; }
+.anno-title { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--fg); }
+.anno-n { color: var(--accent); }
+.anno-text { font-size: 10px; letter-spacing: 0.04em; line-height: 1.5; color: var(--fg-2); }
+@media (max-width: 860px) {
+  .anno-lines, .anno-labels { display: none; }
+}

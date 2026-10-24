@@ -40,6 +40,45 @@ export type SplatModel = {
   cardFit?: number;
 };
 
+/**
+ * A CAD-style callout pinned to a point on a 3D model. The label stays fixed on the page; only the
+ * end of its leader line follows `anchor` as the model turns. Coordinates are in the model file's own
+ * space (before the viewer's rotation/scale). `normal` points away from the surface there: when it
+ * faces away from the camera, the line is drawn behind the model so the machine hides it.
+ */
+export type Annotation = {
+  title: string;
+  text: string;
+  /** Where the label sits on the page. */
+  slot: "left" | "right-1" | "right-2";
+  anchor: [number, number, number];
+  normal: [number, number, number];
+};
+
+export const ht1Annotations: Annotation[] = [
+  {
+    title: "Swappable power module",
+    text: "Battery, hybrid or plug-in hybrid. Swaps at the rear.",
+    slot: "left",
+    anchor: [0, -0.05, -0.42],
+    normal: [0, 0, -1],
+  },
+  {
+    title: "Autonomy sensor module",
+    text: "Mounts front and back of the cab. Add it or remove it.",
+    slot: "right-1",
+    anchor: [-0.022, -0.368, -0.134],
+    normal: [0, -1, 0],
+  },
+  {
+    title: "Electro-hydraulic lift arms",
+    text: "A dedicated electric motor and pump for each function.",
+    slot: "right-2",
+    anchor: [0.268, -0.029, -0.094],
+    normal: [1, 0, 0],
+  },
+];
+
 export type Machine = {
   slug: string;
   code: string;

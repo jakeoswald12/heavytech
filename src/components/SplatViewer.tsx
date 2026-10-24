@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { SplatModel } from "@/data/site";
+import type { Annotation, SplatModel } from "@/data/site";
 
 type Status = "loading" | "live" | "error";
+const NO_ANNOTATIONS: Annotation[] = []; // stable default so the effect doesn't re-run every render
 
 /**
  * Interactive Gaussian-splat viewer. Stays blank until the model is ready, then fades it in (the studio
@@ -17,6 +18,7 @@ export default function SplatViewer({
   compact = false,
   bare = false,
   showStatus = !bare,
+  annotations = NO_ANNOTATIONS,
 }: {
   model: SplatModel;
   poster: string;
@@ -28,10 +30,15 @@ export default function SplatViewer({
   bare?: boolean;
   /** Show the small "Drag to rotate" status line under the model. */
   showStatus?: boolean;
+  /** CAD-style callouts whose leader lines stay pinned to points on the model. */
+  annotations?: Annotation[];
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<Status>("loading");
+  const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const frontRefs = useRef<(SVGGElement | null)[]>([]);
+  const backRefs = useRef<(SVGGElement | null)[]>([]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -87,8 +94,22 @@ export default function SplatViewer({
           camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.1 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
         };
-        size();
-        const ro = new ResizeObserver(size);
+        // Leader-line start points: the inner end of each label's underline, relative to the stage.
+        let starts: { x: number; y: number }[] = [];
+        const measureLabels = () => {
+          const s = stage.getBoundingClientRect();
+          starts = annotations.map((a, i) => {
+            const r = labelRefs.current[i]?.getBoundingClientRect();
+            if (!r) return { x: 0, y: 0 };
+            return { x: (a.slot === "left" ? r.right : r.left) - s.left, y: r.bottom - s.top };
+          });
+        };
+        const sizeAll = () => {
+          size();
+          measureLabels();
+        };
+        sizeAll();
+        const ro = new ResizeObserver(sizeAll);
         ro.observe(stage);
 
         const mesh = new SplatMesh({ url: model.src });
@@ -102,6 +123,46 @@ export default function SplatViewer({
             if (!disposed) setStatus("error");
           });
 
+        // Annotation anchors in model space; re-projected to the screen every frame.
+        const anchors = annotations.map((a) => new THREE.Vector3(...a.anchor));
+        const normals = annotations.map((a) => new THREE.Vector3(...a.normal));
+        const world = new THREE.Vector3();
+        const dir = new THREE.Vector3();
+        const toCam = new THREE.Vector3();
+        const quat = new THREE.Quaternion();
+        const placeLines = () => {
+          if (!annotations.length) return;
+          const w = stage.clientWidth;
+          const h = stage.clientHeight;
+          mesh.getWorldQuaternion(quat);
+          annotations.forEach((_, i) => {
+            world.copy(anchors[i]);
+            mesh.localToWorld(world);
+            toCam.copy(camera.position).sub(world);
+            const facing = dir.copy(normals[i]).applyQuaternion(quat).dot(toCam) > 0;
+            const p = world.clone().project(camera);
+            const x = ((p.x + 1) / 2) * w;
+            const y = ((1 - p.y) / 2) * h;
+            const s = starts[i] ?? { x: 0, y: 0 };
+            // Draw the line in front of the model when its point faces the camera, behind it otherwise.
+            for (const [g, show] of [
+              [frontRefs.current[i], facing],
+              [backRefs.current[i], !facing],
+            ] as const) {
+              if (!g) continue;
+              g.style.display = show ? "" : "none";
+              const line = g.querySelector("line");
+              const dot = g.querySelector("circle");
+              line?.setAttribute("x1", String(s.x));
+              line?.setAttribute("y1", String(s.y));
+              line?.setAttribute("x2", String(x));
+              line?.setAttribute("y2", String(y));
+              dot?.setAttribute("cx", String(x));
+              dot?.setAttribute("cy", String(y));
+            }
+          });
+        };
+
         let visible = true;
         const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
         io.observe(stage);
@@ -109,6 +170,7 @@ export default function SplatViewer({
           if (!visible) return;
           controls.update();
           renderer.render(scene, camera);
+          placeLines();
         });
 
         cleanup = () => {
@@ -146,7 +208,7 @@ export default function SplatViewer({
       near?.disconnect();
       cleanup();
     };
-  }, [model, compact, bare]);
+  }, [model, compact, bare, annotations]);
 
   // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
   const showPoster = status === "error";
@@ -157,6 +219,16 @@ export default function SplatViewer({
       <div ref={stageRef} className="splat-stage">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {showPoster ? <img className="splat-poster" src={poster} alt={alt} /> : null}
+        {annotations.length ? (
+          <svg className="anno-lines anno-back" aria-hidden="true" data-live={status === "live"}>
+            {annotations.map((a, i) => (
+              <g key={a.title} ref={(el) => void (backRefs.current[i] = el)} style={{ display: "none" }}>
+                <line />
+                <circle r="3" />
+              </g>
+            ))}
+          </svg>
+        ) : null}
         <canvas
           ref={canvasRef}
           className="splat-canvas"
@@ -164,6 +236,30 @@ export default function SplatViewer({
           data-live={status === "live"}
           style={{ visibility: status === "error" ? "hidden" : "visible" }}
         />
+        {annotations.length ? (
+          <>
+            <svg className="anno-lines anno-front" aria-hidden="true" data-live={status === "live"}>
+              {annotations.map((a, i) => (
+                <g key={a.title} ref={(el) => void (frontRefs.current[i] = el)} style={{ display: "none" }}>
+                  <line />
+                  <circle r="3" />
+                </g>
+              ))}
+            </svg>
+            <ol className="anno-labels" data-live={status === "live"} aria-label="Callouts">
+              {annotations.map((a, i) => (
+                <li key={a.title} className={`anno anno-${a.slot}`}>
+                  <div ref={(el) => void (labelRefs.current[i] = el)} className="anno-box">
+                    <span className="anno-title">
+                      <span className="anno-n">{String(i + 1).padStart(2, "0")}</span> — {a.title}
+                    </span>
+                    <span className="anno-text">{a.text}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : null}
       </div>
       {!showStatus ? null : (
         <div className="splat-ctl">
