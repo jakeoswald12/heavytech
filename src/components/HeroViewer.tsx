@@ -1,6 +1,8 @@
 import { ht1Annotations, machines } from "@/data/site";
 import SplatViewer from "./SplatViewer";
 
+const HERO_OFFSET: [number, number] = [-20, -10];
+
 /** Home-page hero: the HT-1 in 3D, turning slowly until the visitor drags it. */
 export default function HeroViewer() {
   const m = machines.find((x) => x.slug === "ht-1" && x.model);
@@ -13,8 +15,9 @@ export default function HeroViewer() {
       showStatus={false}
       annotations={ht1Annotations}
       bleed={0.3}
-      // Opens on the machine's left side with the bucket pointing lower right.
-      startAngle={-0.53 * Math.PI}
+      // Opens nearly front-on, turned slightly to the viewer's right, so the slow spin has room to play.
+      startAngle={-0.36 * Math.PI}
+      offset={HERO_OFFSET}
     />
   );
 }

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Annotation, SplatModel } from "@/data/site";
 
 type Status = "loading" | "live" | "error";
-const NO_ANNOTATIONS: Annotation[] = []; // stable default so the effect doesn't re-run every render
+const NO_ANNOTATIONS: Annotation[] = [];
+const NO_OFFSET: [number, number] = [0, 0]; // stable default so the effect doesn't re-run every render
 
 /**
  * Interactive Gaussian-splat viewer. Stays blank until the model is ready, then fades it in (the studio
@@ -21,6 +22,7 @@ export default function SplatViewer({
   annotations = NO_ANNOTATIONS,
   bleed = 0,
   startAngle = 0,
+  offset = NO_OFFSET,
 }: {
   model: SplatModel;
   poster: string;
@@ -41,6 +43,8 @@ export default function SplatViewer({
   bleed?: number;
   /** Rotate the starting camera position around the model (radians; negative turns the view right). */
   startAngle?: number;
+  /** Nudge the rendered model by [x, y] pixels without moving the labels (leader lines follow it). */
+  offset?: [number, number];
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -176,8 +180,8 @@ export default function SplatViewer({
             toCam.copy(camera.position).sub(world);
             const facing = dir.copy(normals[i]).applyQuaternion(quat).dot(toCam) > 0;
             const p = world.clone().project(camera);
-            const x = ((p.x + 1) / 2) * w;
-            const y = ((1 - p.y) / 2) * h;
+            const x = ((p.x + 1) / 2) * w + offset[0];
+            const y = ((1 - p.y) / 2) * h + offset[1];
             const s = starts[i] ?? { x: 0, y: 0 };
             // Draw the line in front of the model when its point faces the camera, behind it otherwise.
             for (const [g, show] of [
@@ -244,7 +248,7 @@ export default function SplatViewer({
       near?.disconnect();
       cleanup();
     };
-  }, [model, compact, bare, annotations, bleed, startAngle]);
+  }, [model, compact, bare, annotations, bleed, startAngle, offset]);
 
   // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
   const showPoster = status === "error";
@@ -270,7 +274,11 @@ export default function SplatViewer({
           className="splat-canvas"
           aria-label={`Interactive 3D view: ${alt}. Drag to rotate.`}
           data-live={status === "live"}
-          style={{ visibility: status === "error" ? "hidden" : "visible", height: bleed ? `${(1 + bleed) * 100}%` : undefined }}
+          style={{
+            visibility: status === "error" ? "hidden" : "visible",
+            height: bleed ? `${(1 + bleed) * 100}%` : undefined,
+            translate: offset[0] || offset[1] ? `${offset[0]}px ${offset[1]}px` : undefined,
+          }}
         />
         {annotations.length ? (
           <>
