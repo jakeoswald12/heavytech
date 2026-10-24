@@ -86,6 +86,9 @@ export default function SplatViewer({
         scene.add(new SparkRenderer({ renderer }));
 
         const controls = new OrbitControls(camera, canvas);
+        // OrbitControls claims every touch (touch-action: none), which blocks page scrolling on phones.
+        // Hand vertical swipes back to the browser: they scroll the page, sideways drags turn the model.
+        canvas.style.touchAction = "pan-y";
         controls.enableZoom = false;
         controls.enablePan = false;
         controls.enableDamping = true;
@@ -130,7 +133,7 @@ export default function SplatViewer({
             camera.aspect = w / h;
             camera.clearViewOffset();
           }
-          camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.1 : 2.45) * (model.fit ?? 1));
+          camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.6 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
         };
         // Leader-line start points: the inner end of each label's underline, relative to the stage.

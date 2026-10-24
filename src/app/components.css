@@ -68,19 +68,23 @@
 }
 
 .nav-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+/* Every header control is the same 40px height. */
+.nav-actions .btn { height: 40px; box-sizing: border-box; }
 .theme-toggle { width: 40px; height: 40px; padding: 0; justify-content: center; }
-.nav-burger { display: none; }
+.nav-burger { display: none; width: 40px; padding: 0; justify-content: center; }
 .mobile-menu { border-top: 1px solid var(--rule); background: var(--bg); height: calc(100dvh - 64px); overflow-y: auto; }
 .mobile-menu ul { list-style: none; margin: 0; padding: 20px 0 40px; display: grid; }
-.mobile-menu a { display: flex; align-items: baseline; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); text-decoration: none; }
-.mobile-menu a[aria-current="true"] .display { color: var(--accent); }
+/* Numbers sit centred on their titles. Only Reserve is gold in the phone menu. */
+.mobile-menu a { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); text-decoration: none; }
+.mobile-menu .label { flex: none; white-space: nowrap; }
 @media (max-width: 980px) {
   .nav-row { align-items: center; padding-block: 12px; }
   .nav-stack { display: none; }
   .nav-burger { display: inline-flex; }
 }
 @media (max-width: 420px) {
-  .nav-cta { display: none; }
+  .nav-actions { gap: 8px; }
+  .nav-cta { padding-inline: 14px; }
 }
 
 /* Anchored sections land below the sticky header. */
@@ -107,7 +111,14 @@ main [id] { scroll-margin-top: 0; }
 .hero-viewer { position: absolute; inset: 0; z-index: 1; }
 @media (min-width: 861px) { .hero-viewer { left: 26%; } }
 @media (max-width: 980px) { .hero-inner { min-height: min(900px, calc(100svh - 64px)); } }
-@media (max-width: 700px) { .hero-inner { min-height: 680px; } }
+/* Phones: the model sits in the upper part of the screen, smaller, and the title and subtitle
+   stay fully visible below it within the first screen. */
+@media (max-width: 700px) {
+  .hero-inner { min-height: calc(100svh - 64px); padding-block: 24px 28px; }
+  .hero-viewer { inset: 0 0 auto 0; height: 60%; }
+  .hero-title { font-size: clamp(38px, 11vw, 56px); }
+  .hero-copy { gap: 14px; }
+}
 
 /* ---------- splat viewer ---------- */
 .splat { position: relative; width: 100%; height: 100%; }
@@ -433,7 +444,7 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 .rotator-item:last-child { border-bottom: 1px solid var(--rule); }
 .rotator-title {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 14px;
   width: 100%;
   padding: 14px 0;
@@ -520,3 +531,6 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 
 .news-meta .display { font-size: clamp(14px, 1.15vw, 17px); letter-spacing: -0.01em; line-height: 1.15; }
 .section.section-lineup { border-top: 0; } /* no rule under the hero; the model runs past it */
+
+/* Feature numbers never wrap and stay centred on titles that run to two lines. */
+.rotator-index { flex: none; white-space: nowrap; }

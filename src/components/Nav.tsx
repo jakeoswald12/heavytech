@@ -97,9 +97,16 @@ export default function Nav() {
             className="btn btn-ghost nav-burger"
             aria-expanded={open}
             aria-controls="mobile-menu"
+            aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpenOn(open ? null : pathname)}
           >
-            {open ? "Close" : "Menu"}
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              {open ? (
+                <path d="M4 4l12 12M16 4L4 16" />
+              ) : (
+                <path d="M2.5 5.5h15M2.5 10h15M2.5 14.5h15" />
+              )}
+            </svg>
           </button>
         </div>
       </div>
