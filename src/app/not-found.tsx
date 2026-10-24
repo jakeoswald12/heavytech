@@ -8,7 +8,7 @@ export default function NotFound() {
         <Link href="/" className="btn btn-solid">
           Home
         </Link>
-        <Link href="/machines/" className="btn">
+        <Link href="/#machines" className="btn">
           Machines
         </Link>
       </div>

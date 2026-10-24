@@ -118,7 +118,7 @@ export default async function MachinePage({ params }: PageProps<"/machines/[slug
 
       <section className="section-tight wrap">
         <div className="inner machine-nav">
-          <Link href="/machines/">
+          <Link href="/#machines">
             <span className="label">← Back</span>
             <span className="display h-s">All machines</span>
           </Link>

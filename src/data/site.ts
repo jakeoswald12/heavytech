@@ -19,12 +19,14 @@ export const site = {
 };
 
 // Order matches the order these pages are presented across the site.
+// The site is one page; each nav item is a section on the home page, in page order.
 export const nav = [
-  { href: "/machines/", label: "Machines" },
-  { href: "/technology/", label: "Technology" },
-  { href: "/ownership/", label: "Ownership" },
-  { href: "/news/", label: "News" },
-  { href: "/company/", label: "Company" },
+  { id: "top", label: "Home" },
+  { id: "machines", label: "Machines" },
+  { id: "technology", label: "Technology" },
+  { id: "service", label: "Service" },
+  { id: "news", label: "News" },
+  { id: "company", label: "Company" },
 ];
 
 export type SplatModel = {
@@ -180,4 +182,6 @@ export const news: NewsItem[] = [
   { slug: "nei-podcast", title: "On the NEI Pioneer Podcast", date: "2025-06-23", kind: "Podcast", summary: "Why Northeast Indiana is the right place to build a future-focused industrial company.", image: "/images/news/nei-podcast.webp", href: post("heavytech-featured-on-the-nei-pioneer-podcast-powering-the-future-from-fort-wayne") },
   { slug: "webinar", title: "Live update webinar: progress, traction and what’s ahead", date: "2025-06-23", kind: "Video", summary: "A live LinkedIn update on where HeavyTech stands.", image: "/images/news/webinar.webp", href: post("heavytech-hosts-live-update-webinar-on-linkedin-progress-traction-and-what-s-ahead") },
   { slug: "kickoff-recap", title: "HeavyTech kicks off in Fort Wayne", date: "2025-05-17", kind: "Event", summary: "Investors, industry leaders and community partners at the May 7 launch event.", image: "/images/news/kickoff-recap.webp", href: post("heavytech-kicks-off-innovation-journey-in-fort-wayne") },
+  { slug: "swappable-flexibility", title: "Operational flexibility with swappable powertrains", date: "2025-04-25", kind: "Article", summary: "Why a swappable powertrain lets one machine fit more jobs, sites and fuel situations.", image: "/images/news/swappable-flexibility.webp", href: post("maximizing-operational-flexibility-with-swappable-powertrain-technology-in-off-highway-equipment") },
+  { slug: "kickoff-event", title: "Kickoff event in Fort Wayne, May 7", date: "2025-04-18", kind: "Event", summary: "An invitation to HeavyTech’s launch event in Fort Wayne.", image: "/images/news/kickoff-event.webp", href: post("attend-our-kickoff-event-in-fort-wayne-may-7th") },
 ];

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { Machine, NewsItem } from "@/data/site";
+import type { Machine } from "@/data/site";
 import Reveal from "./Reveal";
 import SplatViewer from "./SplatViewer";
 
@@ -86,29 +86,6 @@ export function MachineCard({ m, index }: { m: Machine; index: number }) {
         </div>
       </div>
     </article>
-  );
-}
-
-const fmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-
-export function NewsCard({ n }: { n: NewsItem }) {
-  return (
-    <a href={n.href} className="news-card" target="_blank" rel="noopener">
-      <div className="news-img">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={n.image} alt="" loading="lazy" />
-      </div>
-      <div className="news-meta">
-        <span className="label">
-          {n.kind} · {fmt.format(new Date(n.date))}
-        </span>
-        <h3 className="display h-s">{n.title}</h3>
-        <p>{n.summary}</p>
-        <span className="label news-more">
-          Read on heavytech.ai <span aria-hidden="true">↗</span>
-        </span>
-      </div>
-    </a>
   );
 }
 

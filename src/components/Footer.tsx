@@ -29,10 +29,10 @@ export default function Footer() {
           <span className="label">Company</span>
           <ul>
             {nav
-              .filter((n) => n.href !== "/machines/")
+              .filter((n) => n.id !== "top" && n.id !== "machines")
               .map((n) => (
-                <li key={n.href}>
-                  <Link href={n.href}>{n.label}</Link>
+                <li key={n.id}>
+                  <Link href={`/#${n.id}`}>{n.label}</Link>
                 </li>
               ))}
             <li>
