@@ -9,18 +9,11 @@
   position: sticky;
   top: env(safe-area-inset-top, 0px);
   z-index: 50;
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--rule);
-  transition: background-color 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
+  /* No fill: the header floats over the page as it scrolls. */
+  background: transparent;
 }
-.nav[data-top="true"] {
-  background-color: transparent;
-  border-bottom-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
+/* Only the open phone menu gets a solid background, so its list is readable. */
+.nav:has(.mobile-menu:not([hidden])) { background: var(--bg); }
 .nav-row { display: flex; align-items: flex-start; gap: 28px; padding-block: 16px; }
 .wordmark {
   font-family: var(--font-display);
@@ -36,7 +29,7 @@
 .wordmark-lg { font-size: clamp(30px, 3vw, 44px); }
 
 /* Vertical section nav with a gold elbow arrow that stretches to the active item (Mekko-style). */
-.nav-stack { position: relative; margin-left: clamp(24px, 12vw, 220px); padding-left: 30px; }
+.nav-stack { position: relative; margin-left: 24px; padding-left: 30px; }
 .nav-stack ul { list-style: none; margin: 0; padding: 0; }
 .nav-stack a {
   display: block;

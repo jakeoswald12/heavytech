@@ -26,15 +26,11 @@ export default function Nav() {
     document.documentElement.style.overflow = open ? "hidden" : "";
   }, [open]);
 
-  // Transparent at the very top so it blends into the hero; fades in once the page scrolls.
-  const [atTop, setAtTop] = useState(true);
-
   // Scroll-spy: the section nearest the top of the viewport is the active one.
   const [spied, setSpied] = useState("top");
   const lockUntil = useRef(0);
   useEffect(() => {
     const onScroll = () => {
-      setAtTop(window.scrollY < 8);
       if (!onHome || Date.now() < lockUntil.current) return;
       const line = window.innerHeight * 0.35;
       let current = nav[0].id;
@@ -65,7 +61,7 @@ export default function Nav() {
   };
 
   return (
-    <header className="nav wrap" data-top={atTop && !open}>
+    <header className="nav wrap">
       <div className="inner nav-row">
         <Link href="/" className="wordmark" aria-label="HeavyTech home" onClick={() => pick("top")}>
           HeavyTech
