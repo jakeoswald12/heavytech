@@ -237,7 +237,7 @@ export default function Home() {
           <div className="inner split">
             <Reveal className="split-copy">
               <Eyebrow n={5}>Company</Eyebrow>
-              <h2 className="display h-m">Built in Fort Wayne.</h2>
+              <h2 className="display h-m">Made in the Midwest.</h2>
             </Reveal>
             <Reveal className="prose" delay={0.1}>
               <p>
