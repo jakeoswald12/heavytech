@@ -263,8 +263,8 @@ sup a:hover{color:var(--accent)}
   .js-io .lcw.in svg.lc polyline.s2,.js-io .lcw.in svg.lc circle,.js-io .lcw.in svg.lc text.lab{opacity:1}
   /* recommended-column score bars blink on like indicator lamps */
   .js-io #chan .score.hl i.on{opacity:0}
-  .js-io #chan.in .score.hl i.on{animation:blink .55s steps(1,end) both;animation-delay:calc(.15s + var(--r,0) * .16s + var(--s,0) * .09s)}
-  @keyframes blink{0%{opacity:0}15%{opacity:1}30%{opacity:.15}48%{opacity:1}62%{opacity:.35}78%,100%{opacity:1}}
+  .js-io #chan.in .score.hl i.on{animation:cellfill .4s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(.15s + var(--r,0) * .12s + var(--s,0) * .14s)}
+  @keyframes cellfill{0%{opacity:0}55%{opacity:1;filter:brightness(1.35)}100%{opacity:1;filter:none}}
   @supports (animation-timeline: view()){
     :root{--ease:cubic-bezier(.22,.8,.26,1)}
     /* shared scroll reveal */
