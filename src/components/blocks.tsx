@@ -48,7 +48,6 @@ export function Split({
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="render" src={image.src} alt={image.alt} loading="lazy" />
-            {image.caption ? <figcaption className="label">{image.caption}</figcaption> : null}
           </figure>
         </Reveal>
       </div>

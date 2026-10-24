@@ -16,6 +16,7 @@ export default function SplatViewer({
   className = "",
   compact = false,
   bare = false,
+  showStatus = !bare,
 }: {
   model: SplatModel;
   poster: string;
@@ -23,8 +24,10 @@ export default function SplatViewer({
   className?: string;
   /** Pull the camera back for smaller frames. */
   compact?: boolean;
-  /** No status line, and only start loading when scrolled near (for cards). */
+  /** Card mode: no auto-rotate, no status line, and only loads when scrolled near. */
   bare?: boolean;
+  /** Show the small "Drag to rotate" status line under the model. */
+  showStatus?: boolean;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,7 +62,9 @@ export default function SplatViewer({
         controls.dampingFactor = 0.08;
         controls.minPolarAngle = Math.PI * 0.18;
         controls.maxPolarAngle = Math.PI * 0.52;
-        controls.autoRotate = !reduce;
+        // Large viewers turn slowly on their own; cards stay still until dragged.
+        const spin = !bare && !reduce;
+        controls.autoRotate = spin;
         controls.autoRotateSpeed = 1.1;
         let idle: ReturnType<typeof setTimeout> | undefined;
         controls.addEventListener("start", () => {
@@ -68,7 +73,7 @@ export default function SplatViewer({
         });
         controls.addEventListener("end", () => {
           clearTimeout(idle);
-          idle = setTimeout(() => (controls.autoRotate = !reduce), 3500);
+          if (spin) idle = setTimeout(() => (controls.autoRotate = true), 3500);
         });
 
         camera.position.set(1.55, 0.75, 1.65);
@@ -159,7 +164,7 @@ export default function SplatViewer({
           style={{ visibility: status === "error" ? "hidden" : "visible" }}
         />
       </div>
-      {bare ? null : (
+      {!showStatus ? null : (
         <div className="splat-ctl">
           <span className="label splat-status" data-live={status === "live"}>
             <span className="dot" aria-hidden="true" />

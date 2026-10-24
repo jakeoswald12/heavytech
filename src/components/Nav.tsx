@@ -15,10 +15,19 @@ export default function Nav() {
     document.documentElement.style.overflow = open ? "hidden" : "";
   }, [open]);
 
+  // Transparent at the very top so it blends into the hero; fades in once the page scrolls.
+  const [atTop, setAtTop] = useState(true);
+  useEffect(() => {
+    const onScroll = () => setAtTop(window.scrollY < 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const isActive = (href: string) => pathname === href || pathname.startsWith(href);
 
   return (
-    <header className="nav wrap">
+    <header className="nav wrap" data-top={atTop && !open}>
       <div className="inner nav-row">
         <Link href="/" className="wordmark" aria-label="HeavyTech home">
           HeavyTech
