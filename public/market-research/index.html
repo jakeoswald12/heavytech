@@ -250,6 +250,17 @@ sup a:hover{color:var(--accent)}
   .bar .nav a{animation:fadein .8s ease both}
   .bar .nav a:nth-child(n){animation-delay:calc(var(--i,0) * 40ms)}
   @keyframes fadein{from{opacity:0}to{opacity:1}}
+  /* charts: time-based, triggered once when the chart is in view; half-second delay, slower draw */
+  .js-io .chart .b,.js-io .chart .rg{transform-origin:left center;transform:scaleX(.03);
+    transition:transform 1.8s cubic-bezier(.22,.8,.26,1) calc(.5s + var(--r,0) * .14s)}
+  .js-io .chart.in .b,.js-io .chart.in .rg{transform:none}
+  .js-io .chart .md,.js-io .chart .cv{opacity:0;transition:opacity .8s ease calc(1.5s + var(--r,0) * .14s)}
+  .js-io .chart.in .md,.js-io .chart.in .cv{opacity:1}
+  .js-io .lcw svg.lc polyline.s0,.js-io .lcw svg.lc polyline.s1{stroke-dasharray:1400;stroke-dashoffset:1400;transition:stroke-dashoffset 2.6s cubic-bezier(.4,.1,.2,1) .5s}
+  .js-io .lcw svg.lc polyline.s1{transition-delay:.75s}
+  .js-io .lcw.in svg.lc polyline.s0,.js-io .lcw.in svg.lc polyline.s1{stroke-dashoffset:0}
+  .js-io .lcw svg.lc polyline.s2,.js-io .lcw svg.lc circle,.js-io .lcw svg.lc text.lab{opacity:0;transition:opacity 1s ease 1.6s}
+  .js-io .lcw.in svg.lc polyline.s2,.js-io .lcw.in svg.lc circle,.js-io .lcw.in svg.lc text.lab{opacity:1}
   @supports (animation-timeline: view()){
     :root{--ease:cubic-bezier(.22,.8,.26,1)}
     /* shared scroll reveal */
@@ -276,15 +287,8 @@ sup a:hover{color:var(--accent)}
     .fbar{animation:widen linear both;animation-timing-function:var(--ease);animation-timeline:view();animation-range:entry 10% entry 80%}
     @keyframes widen{from{transform:scaleX(.55);opacity:.25}to{transform:none;opacity:1}}
     /* chart marks */
-    .track .b,.track .rg{transform-origin:left center;animation:grow linear both;animation-timing-function:var(--ease);
-      animation-timeline:view();animation-range:entry 20% cover 40%}
-    .track .md{animation:reveal linear both;animation-timeline:view();animation-range:entry 40% cover 45%}
     @keyframes grow{from{transform:scaleX(.04)}to{transform:none}}
     .score i.on{animation:grow linear both;transform-origin:left;animation-timeline:view();animation-range:entry 10% entry 90%}
-    svg.lc polyline{stroke-dasharray:1200;animation:draw linear both;animation-timeline:view();animation-range:entry 10% cover 45%}
-    svg.lc .s2{stroke-dasharray:4 3;animation:reveal linear both;animation-timeline:view();animation-range:entry 10% cover 40%}
-    svg.lc circle,svg.lc text{animation:fadein linear both;animation-timeline:view();animation-range:entry 30% cover 45%}
-    @keyframes draw{from{stroke-dashoffset:1200}to{stroke-dashoffset:0}}
     /* divider lines draw across */
     section{background-image:none}
     section::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:var(--fg);opacity:.35;transform-origin:left;
@@ -409,7 +413,7 @@ sup a:hover{color:var(--accent)}
   <div class="panel" style="margin-top:24px">
     <span class="part">2.5 / FORECAST TO 2035</span>
     <div class="unit">US CTL + SSL new units, thousands — three growth paths</div>
-    <div id="c_fc"></div>
+    <div id="c_fc" class="lcw"></div>
     <div class="keys"><span><i class="a"></i>Base +2.5%/yr</span><span><i></i>High +4%/yr</span><span><i class="c"></i>Low 0%/yr</span></div>
     <div class="src">Method: 2025 base of 95k units (midpoint of our 80–110k estimate) grown at three rates. OHR expected a North American sales decline in 2025 and a global recovery from 2026 <sup><a href="#s13">13</a></sup>; housing shortages support compact demand. These paths are our scenarios, not a published forecast. <span class="tag e">E·L</span></div>
   </div>
@@ -470,7 +474,7 @@ sup a:hover{color:var(--accent)}
     <div class="panel">
       <span class="part">4.2 / NA ELECTRIFIED SHARE SCENARIOS</span>
       <div class="unit">Share of NA compact loader sales that are hybrid or electric, %</div>
-      <div id="c_share"></div>
+      <div id="c_share" class="lcw"></div>
       <div class="keys"><span><i class="d"></i>OHR data point (all equipment)</span><span><i class="a"></i>Base</span><span><i></i>High</span><span><i class="c"></i>Low</span></div>
       <div class="src">Anchors: about 0.07% in 2023 and about 1% forecast for 2028 <sup><a href="#s16">16</a></sup>. Our 2035 scenarios: low 2.5%, base 6%, high 15%. They include hybrids, which OHR's battery-electric counts do not. <span class="tag e">E·L</span></div>
     </div>
@@ -737,6 +741,9 @@ $('#themeBtn').addEventListener('click',()=>{
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',paintToggle);
 paintToggle();
 
+/* one-shot chart entrance */
+const motionOK=matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window;
+if(motionOK) root.classList.add('js-io');
 /* horizontal bar chart */
 function bars(el,rows,max,ticks,fmtV){
   const c=$(el); let h='';
@@ -745,7 +752,7 @@ function bars(el,rows,max,ticks,fmtV){
     if(r.lo!=null){const l=r.lo/max*100,w=(r.hi-r.lo)/max*100,m=(r.lo+r.hi)/2/max*100;
       inner=`<div class="rg${r.hl?' hl':''}" style="left:${l}%;width:${w}%"></div><div class="md" style="left:calc(${m}% - 1px)"></div>`;}
     else inner=`<div class="b${r.hl?' hl':''}" style="width:${r.v/max*100}%"></div>`;
-    h+=`<div class="crow"><div class="cl">${r.l}${r.sub?`<small>${r.sub}</small>`:''}</div><div class="track">${inner}</div><div class="cv">${fmtV(r)}</div></div>`;
+    h+=`<div class="crow" style="--r:${rows.indexOf(r)}"><div class="cl">${r.l}${r.sub?`<small>${r.sub}</small>`:''}</div><div class="track">${inner}</div><div class="cv">${fmtV(r)}</div></div>`;
   });
   h+=`<div class="axis"><span></span><div class="ax">${ticks.map(t=>`<span>${t}</span>`).join('')}</div><span></span></div>`;
   c.innerHTML=h;
@@ -827,6 +834,10 @@ $('#t_hours_r').addEventListener('input',e=>{$('#t_hours').value=e.target.value;
 $('#t_core').addEventListener('change',tco);
 $$('[data-h]').forEach(b=>b.addEventListener('click',()=>{$('#t_hours').value=b.dataset.h;$('#t_hours_r').value=b.dataset.h;$$('[data-h]').forEach(x=>x.setAttribute('aria-pressed',x===b));tco();}));
 tco();
+if(motionOK){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.35});
+  $$('.chart,.lcw').forEach(el=>io.observe(el));
+}
 
 /* competitor matrix: [type, pt, company, product, powertrainLabel, approach, autonomy, price, channel, stage, srcs, highlight] */
 const M=[
