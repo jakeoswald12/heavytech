@@ -129,11 +129,11 @@
 .hero-picker {
   position: absolute;
   right: max(var(--gutter), env(safe-area-inset-right, 0px));
-  bottom: 136px;
+  bottom: 64px;
   z-index: 4;
 }
 @media (max-width: 700px) {
-  .hero-picker { right: auto; left: max(var(--gutter), env(safe-area-inset-left, 0px)); bottom: 192px; }
+  .hero-picker { right: auto; left: max(var(--gutter), env(safe-area-inset-left, 0px)); bottom: 146px; }
   .splat-poster { inset: 18% 0 26%; }
   .splat-ctl { left: 0; right: auto; align-items: flex-start; padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); bottom: 110px; }
 }

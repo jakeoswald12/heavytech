@@ -25,7 +25,6 @@ export default function SplatViewer({
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<Status>("loading");
-  const [mode, setMode] = useState<"3d" | "render">("3d");
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -90,10 +89,7 @@ export default function SplatViewer({
         mesh.initialized
           .then(() => !disposed && setStatus("live"))
           .catch(() => {
-            if (!disposed) {
-              setStatus("error");
-              setMode("render");
-            }
+            if (!disposed) setStatus("error");
           });
 
         let visible = true;
@@ -114,10 +110,7 @@ export default function SplatViewer({
           renderer.dispose();
         };
       } catch {
-        if (!disposed) {
-          setStatus("error");
-          setMode("render");
-        }
+        if (!disposed) setStatus("error");
       }
     })();
 
@@ -127,9 +120,9 @@ export default function SplatViewer({
     };
   }, [model, compact]);
 
-  const showPoster = mode === "render" || status !== "live";
-  const statusText =
-    status === "live" ? "Live 3D · drag to rotate" : status === "loading" ? "Loading 3D model…" : "3D unavailable · showing render";
+  // The studio render stands in until the 3D model is ready (or if 3D can't run on this device).
+  const showPoster = status !== "live";
+  const statusText = status === "live" ? "Drag to rotate" : status === "loading" ? "Loading 3D model…" : "Studio render";
 
   return (
     <div className={`splat ${className}`}>
@@ -140,18 +133,10 @@ export default function SplatViewer({
           ref={canvasRef}
           className="splat-canvas"
           aria-label={`Interactive 3D view: ${alt}. Drag to rotate.`}
-          style={{ visibility: mode === "3d" ? "visible" : "hidden" }}
+          style={{ visibility: status === "error" ? "hidden" : "visible" }}
         />
       </div>
       <div className="splat-ctl">
-        <div className="seg" role="group" aria-label="Viewer mode">
-          <button type="button" aria-pressed={mode === "3d"} onClick={() => setMode("3d")} disabled={status === "error"}>
-            3D
-          </button>
-          <button type="button" aria-pressed={mode === "render"} onClick={() => setMode("render")}>
-            Studio render
-          </button>
-        </div>
         <span className="label splat-status" data-live={status === "live"}>
           <span className="dot" aria-hidden="true" />
           {statusText}
