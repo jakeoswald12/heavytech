@@ -375,3 +375,11 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 .duo-copy { display: grid; gap: 10px; }
 .duo-copy p { font-size: 11px; color: var(--fg-2); max-width: 52ch; }
 @media (max-width: 700px) { .duo-grid { grid-template-columns: 1fr; } }
+
+/* A section that continues the one above it: no rule, tighter top spacing. */
+.section.section-joined { border-top: 0; padding-top: clamp(16px, 3vw, 48px); }
+/* Four points in a 2 x 2 grid inside a copy column. */
+.point-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 28px; margin-top: 14px; }
+.point-grid > div { display: grid; gap: 10px; align-content: start; border-top: 2px solid var(--fg); padding-top: 16px; min-width: 0; }
+.point-grid p { font-size: 11px; color: var(--fg-2); }
+@media (max-width: 520px) { .point-grid { grid-template-columns: 1fr; } }

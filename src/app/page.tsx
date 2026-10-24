@@ -56,69 +56,10 @@ export default function Home() {
       {/* ---------- Technology ---------- */}
       <div id="technology">
         <section className="section wrap ticks">
-          <Reveal className="inner statement-grid">
-            <Eyebrow n={2}>Technology</Eyebrow>
-            <h2 className="display h-l">A new architecture.</h2>
-            <p className="lede">
-              Batteries, motors, power electronics and software have all moved fast. The basic layout of off-highway equipment
-              hasn’t. HeavyTech starts from a blank sheet and designs the whole machine as one system.
-            </p>
-          </Reveal>
-        </section>
-
-        <Split
-          label="Interchangeable powertrain"
-          title="Swappable power."
-          image={{ src: "/images/technology/guts.webp", alt: "HeavyTech swappable power module with engine, generator and battery" }}
-        >
-          <p>
-            The front of every HeavyTech machine is the same electric architecture. The back, where the power source lives,
-            swaps out. Pick the energy source the job calls for, and change it when the job changes.
-          </p>
-          <PowertrainTabs />
-        </Split>
-
-        <Split
-          flip
-          label="Electro-hydraulics · Patent pending"
-          title="Power on demand."
-          image={{ src: "/images/technology/slide2.webp", alt: "Electric motor coupled to a hydraulic pump with its control board" }}
-        >
-          <p>
-            A dedicated electric motor drives each work-function pump. No directional or pressure control valves burning energy
-            as heat, so every function gets precise, instant, digitally controlled power, and the pump only spins when you’re
-            working.
-          </p>
-        </Split>
-
-        <section className="section wrap">
-          <div className="inner duo-grid">
-            <figure className="duo-item">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="render" src="/images/technology/powertrain.webp" alt="HeavyTech powertrain modules arranged on a chassis base" loading="lazy" />
-              <div className="duo-copy">
-                <h3 className="display h-s">Modular powertrain</h3>
-                <p>Power, energy storage and pumps are separate modules on a common base, so each can be serviced, upgraded or swapped on its own.</p>
-              </div>
-            </figure>
-            <figure className="duo-item">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="render" src="/images/technology/slide3.webp" alt="Valveless hydraulic manifold" loading="lazy" />
-              <div className="duo-copy">
-                <h3 className="display h-s">Valveless digital control</h3>
-                <p>Real-time, high-resolution control of every function without directional or pressure control valves.</p>
-              </div>
-            </figure>
-          </div>
-        </section>
-
-        <section className="section wrap">
-          <div className="inner">
-            <span className="label">Intelligence</span>
-            <Reveal>
-              <h2 className="display h-l" style={{ marginTop: 18 }}>
-                Smarter machines.
-              </h2>
+          <div className="inner statement-grid">
+            <Reveal className="statement-grid">
+              <Eyebrow n={2}>Technology</Eyebrow>
+              <h2 className="display h-l">A new architecture.</h2>
             </Reveal>
             <div className="fgrid fgrid-3">
               <div>
@@ -136,6 +77,44 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <Split
+          label="Interchangeable powertrain"
+          title="Swappable power."
+          image={{ src: "/images/technology/powertrain.webp", alt: "ARLO loader shown transparent, revealing its modular powertrain" }}
+        >
+          <p>
+            The front of every HeavyTech machine is the same electric architecture. The back, where the power source lives,
+            swaps out. Pick the energy source the job calls for, and change it when the job changes.
+          </p>
+          <PowertrainTabs />
+        </Split>
+
+        <Split
+          joined
+          flip
+          label="Electro-hydraulics · Patent pending"
+          title="Power on demand."
+          image={{ src: "/images/technology/slide2.webp", alt: "Electric motor coupled to a hydraulic pump with its control board" }}
+        >
+          <p>
+            A dedicated electric motor drives each work-function pump. No directional or pressure control valves burning energy
+            as heat, so every function gets precise, instant, digitally controlled power, and the pump only spins when you’re
+            working.
+          </p>
+        </Split>
+
+        <Split
+          joined
+          label="Digital hydraulics"
+          title="Valveless control."
+          image={{ src: "/images/technology/slide3.webp", alt: "Valveless hydraulic manifold" }}
+        >
+          <p>
+            Real-time, high-resolution control of every vehicle function without directional or pressure control valves. Fewer
+            parts in the hydraulic circuit means less energy lost, faster response and simpler diagnostics.
+          </p>
+        </Split>
       </div>
 
       {/* ---------- Service ---------- */}
@@ -144,24 +123,8 @@ export default function Home() {
           label="[ 03 ] Service"
           title="Right to repair."
           image={{ src: "/images/machines/ctl_access.webp", alt: "HT-1 with service panels open showing the power module" }}
-        >
-          <p>
-            The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and full
-            service documentation let operators, fleet mechanics and independent shops keep the machine working without
-            proprietary tools.
-          </p>
-          <p>Where we can, we use recognizable, commercially available components instead of hiding them behind our own part numbers.</p>
-        </Split>
-
-        <section className="section wrap">
-          <div className="inner">
-            <span className="label">Complete access</span>
-            <Reveal>
-              <h2 className="display h-l" style={{ marginTop: 18 }}>
-                Built for service.
-              </h2>
-            </Reveal>
-            <div className="fgrid">
+          extra={
+            <div className="point-grid">
               <div>
                 <h3 className="display h-s">Removable panels</h3>
                 <p>Swing-out service doors and panels that come off, so nothing is buried behind something else.</p>
@@ -179,41 +142,14 @@ export default function Home() {
                 <p>Commercially available components wherever practical, so parts can be found locally.</p>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="section wrap ticks">
-          <div className="inner split">
-            <Reveal className="split-copy">
-              <span className="label">Operator cabin</span>
-              <h2 className="display h-m">A modular cab.</h2>
-              <p>
-                Start with an open ROPS platform, move to a lighted canopy or a fully enclosed, climate-controlled cab. Inside, a
-                digital control environment with easy-to-clean surfaces, smooth joystick operation and panoramic visibility.
-              </p>
-            </Reveal>
-            <Reveal className="prose" delay={0.1}>
-              <dl className="spec-list">
-                <div>
-                  <dt>Open</dt>
-                  <dd>ROPS platform</dd>
-                </div>
-                <div>
-                  <dt>Canopy</dt>
-                  <dd>Lighted canopy</dd>
-                </div>
-                <div>
-                  <dt>Enclosed</dt>
-                  <dd>Climate-controlled cab</dd>
-                </div>
-                <div>
-                  <dt>Autonomy</dt>
-                  <dd>Removable sensor module, front and back of cab</dd>
-                </div>
-              </dl>
-            </Reveal>
-          </div>
-        </section>
+          }
+        >
+          <p>
+            The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and full
+            service documentation let operators, fleet mechanics and independent shops keep the machine working without
+            proprietary tools.
+          </p>
+        </Split>
       </div>
 
       {/* ---------- News ---------- */}
@@ -234,49 +170,38 @@ export default function Home() {
       {/* ---------- Company ---------- */}
       <div id="company">
         <section className="section wrap ticks">
-          <div className="inner split">
-            <Reveal className="split-copy">
-              <Eyebrow n={5}>Company</Eyebrow>
-              <h2 className="display h-m">Made in the Midwest.</h2>
-            </Reveal>
-            <Reveal className="prose" delay={0.1}>
-              <p>
-                HeavyTech was founded by industry experts, engineers and stakeholders who saw an industry overdue for a new
-                approach. Our mission is simple: design and build powerful, high-performance machines that are affordable and
-                practical to own.
-              </p>
-              <p>
-                Large manufacturers have enormous investments in existing platforms, factories and supply chains. A startup gets a
-                blank sheet: whether a hydraulic function should still be powered the same way, whether mechanical complexity can
-                become digital control, whether the machine can diagnose itself.
-              </p>
-            </Reveal>
-          </div>
-        </section>
-
-        <section className="section-tight wrap">
-          <div className="inner photo-row">
-            <figure className="photo" style={{ margin: 0 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/company/expo_ivt.webp" alt="HeavyTech booth at IVT Expo with scale models of HT-1 and ARLO" loading="lazy" />
-            </figure>
-            <figure className="photo" style={{ margin: 0 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/company/photo_3331.webp" alt="CAD model of a HeavyTech track assembly on an engineering workstation" loading="lazy" />
-            </figure>
-          </div>
-          <div className="inner fgrid fgrid-3">
-            <div>
-              <h3 className="display h-s">Northeast Indiana</h3>
-              <p>A region with deep manufacturing roots and the industrial base to build heavy equipment again.</p>
+          <div className="inner">
+            <div className="split">
+              <Reveal className="split-copy">
+                <Eyebrow n={5}>Company</Eyebrow>
+                <h2 className="display h-m">Made in the Midwest.</h2>
+              </Reveal>
+              <Reveal className="prose" delay={0.1}>
+                <p>
+                  HeavyTech was founded by industry experts, engineers and stakeholders who saw an industry overdue for a new
+                  approach. Our mission is simple: design and build powerful, high-performance machines that are affordable and
+                  practical to own.
+                </p>
+                <p>
+                  Large manufacturers have enormous investments in existing platforms, factories and supply chains. A startup gets
+                  a blank sheet: whether a hydraulic function should still be powered the same way, whether mechanical complexity
+                  can become digital control, whether the machine can diagnose itself.
+                </p>
+              </Reveal>
             </div>
-            <div>
-              <h3 className="display h-s">Domestic supply</h3>
-              <p>US steel and domestic components, minimizing global dependencies to protect quality and keep the impact local.</p>
-            </div>
-            <div>
-              <h3 className="display h-s">Partners</h3>
-              <p>We don’t need to invent every component. We work with world-class suppliers and make the parts work together better.</p>
+            <div className="fgrid fgrid-3">
+              <div>
+                <h3 className="display h-s">Northeast Indiana</h3>
+                <p>A region with deep manufacturing roots and the industrial base to build heavy equipment again.</p>
+              </div>
+              <div>
+                <h3 className="display h-s">Domestic supply</h3>
+                <p>US steel and domestic components, minimizing global dependencies to protect quality and keep the impact local.</p>
+              </div>
+              <div>
+                <h3 className="display h-s">Partners</h3>
+                <p>We don’t need to invent every component. We work with world-class suppliers and make the parts work together better.</p>
+              </div>
             </div>
           </div>
         </section>

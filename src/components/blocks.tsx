@@ -27,6 +27,8 @@ export function Split({
   image,
   flip = false,
   band = false,
+  joined = false,
+  extra,
 }: {
   id?: string;
   label: string;
@@ -35,14 +37,19 @@ export function Split({
   image: { src: string; alt: string; caption?: string };
   flip?: boolean;
   band?: boolean;
+  /** Continue the previous section: no dividing rule, tighter top spacing. */
+  joined?: boolean;
+  /** Extra content under the copy column (for example a grid of points). */
+  extra?: ReactNode;
 }) {
   return (
-    <section id={id} className={`section wrap ${band ? "band" : ""}`}>
+    <section id={id} className={`section wrap ${band ? "band" : ""} ${joined ? "section-joined" : ""}`}>
       <div className={`inner split ${flip ? "split-flip" : ""}`}>
         <Reveal className="split-copy">
           <span className="label">{label}</span>
           <h2 className="display h-m">{title}</h2>
           {children}
+          {extra}
         </Reveal>
         <Reveal className="split-media" delay={0.1}>
           <figure>
