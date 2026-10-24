@@ -154,41 +154,20 @@ export default function Home() {
       </section>
 
       {/* ---------- Company ---------- */}
-      <div id="company">
-        <section className="feature-section wrap">
-          <div className="inner feature-inner">
-            <div className="head-stack">
-              <Eyebrow n={4}>Company</Eyebrow>
-              <h2 className="display h-l one-line">Made in the Midwest.</h2>
-              <p className="lede">
-                HeavyTech was founded by industry experts and engineers who saw an industry overdue for a new approach: powerful,
-                high-performance machines that are affordable and practical to own, designed from a blank sheet and built in Fort
-                Wayne, Indiana.
-              </p>
-            </div>
-            <FeatureRotator features={company} label="Company" />
+      <section className="feature-section wrap" id="company">
+        <div className="inner feature-inner">
+          <div className="head-stack">
+            <Eyebrow n={4}>Company</Eyebrow>
+            <h2 className="display h-l one-line">Made in the Midwest.</h2>
+            <p className="lede">
+              HeavyTech was founded by industry experts and engineers who saw an industry overdue for a new approach: powerful,
+              high-performance machines that are affordable and practical to own, designed from a blank sheet and built in Fort
+              Wayne, Indiana.
+            </p>
           </div>
-        </section>
-
-        <section className="section wrap join">
-          <div className="inner join-grid">
-            <span className="label">Reservations · Dealers · Investors</span>
-            <h2 className="display h-l">Join the build.</h2>
-            <p className="lede">Reserve a machine, ask about becoming a dealer, or follow along as the first HT-1 comes together.</p>
-            <div className="ctas">
-              <Link className="btn btn-solid" href="/reserve/">
-                Reserve an HT-1 <span aria-hidden="true">↗</span>
-              </Link>
-              <Link className="btn" href="/reserve/#dealer">
-                Dealer inquiry
-              </Link>
-              <a className="btn" href={site.investorPortal} target="_blank" rel="noopener">
-                Investor portal <span aria-hidden="true">↗</span>
-              </a>
-            </div>
-          </div>
-        </section>
-      </div>
+          <FeatureRotator features={company} label="Company" />
+        </div>
+      </section>
 
       {/* ---------- News ---------- */}
       <section className="section wrap" id="news">
@@ -202,6 +181,26 @@ export default function Home() {
               </div>
             }
           />
+        </div>
+      </section>
+
+      {/* ---------- Join ---------- */}
+      <section className="section wrap join">
+        <div className="inner join-grid">
+          <span className="label">Reservations · Dealers · Investors</span>
+          <h2 className="display h-l">Join the build.</h2>
+          <p className="lede">Reserve a machine, ask about becoming a dealer, or follow along as the first HT-1 comes together.</p>
+          <div className="ctas">
+            <Link className="btn btn-solid" href="/reserve/">
+              Reserve an HT-1 <span aria-hidden="true">↗</span>
+            </Link>
+            <Link className="btn" href="/reserve/#dealer">
+              Dealer inquiry
+            </Link>
+            <a className="btn" href={site.investorPortal} target="_blank" rel="noopener">
+              Investor portal <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
       </section>
     </>

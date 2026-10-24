@@ -14,25 +14,25 @@ const INTERVAL = 4000;
 
 /**
  * A list of features on the left and a matching image on the right. The active feature is gold
- * and expanded; every four seconds the next one opens and the image crossfades. Hovering or
- * focusing the list pauses it; clicking a feature jumps to it.
+ * and expanded; every four seconds the next one opens and the image crossfades, until the visitor
+ * picks a feature. From then on it stays where they put it. Hovering the list pauses the timer.
  */
 export default function FeatureRotator({ features, label }: { features: Feature[]; label: string }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [cycle, setCycle] = useState(0); // bumps to restart the progress bar
+  const [chosen, setChosen] = useState(false); // once the visitor clicks, auto-rotation stops for good
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const go = useCallback((i: number) => {
+  const choose = useCallback((i: number) => {
+    setChosen(true);
     setActive(i);
-    setCycle((c) => c + 1);
   }, []);
 
   useEffect(() => {
-    if (paused) return;
-    timer.current = setTimeout(() => go((active + 1) % features.length), INTERVAL);
+    if (paused || chosen) return;
+    timer.current = setTimeout(() => setActive((a) => (a + 1) % features.length), INTERVAL);
     return () => clearTimeout(timer.current);
-  }, [active, paused, cycle, features.length, go]);
+  }, [active, paused, chosen, features.length]);
 
   return (
     <div className="rotator">
@@ -48,7 +48,7 @@ export default function FeatureRotator({ features, label }: { features: Feature[
           const on = i === active;
           return (
             <li key={f.title} className="rotator-item" data-active={on}>
-              <button type="button" className="rotator-title" aria-expanded={on} onClick={() => go(i)}>
+              <button type="button" className="rotator-title" aria-expanded={on} onClick={() => choose(i)}>
                 <span className="label rotator-index">[ {String(i + 1).padStart(2, "0")} ]</span>
                 <span className="display h-s">{f.title}</span>
               </button>
@@ -57,9 +57,6 @@ export default function FeatureRotator({ features, label }: { features: Feature[
                   <p>{f.body}</p>
                 </div>
               </div>
-              <span className="rotator-progress" aria-hidden="true">
-                {on ? <span key={cycle} className="rotator-bar" data-paused={paused} /> : null}
-              </span>
             </li>
           );
         })}
