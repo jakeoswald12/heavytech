@@ -63,7 +63,9 @@
 
 /* ---------- base ---------- */
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+/* No elastic bounce past the top or bottom of the page. */
+html, body { overscroll-behavior-y: none; }
 body {
   margin: 0;
   background-color: var(--bg);

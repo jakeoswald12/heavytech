@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { nav } from "@/data/site";
+import { scrollToSection } from "./SmoothScroll";
 import ThemeToggle from "./ThemeToggle";
 
 const ROW = 16; // px height of one nav row; the elbow is measured in rows
@@ -52,10 +53,14 @@ export default function Nav() {
   const active = onHome ? spied : sectionForPath(pathname);
   const activeIndex = Math.max(0, nav.findIndex((n) => n.id === active));
   const href = (id: string) => (onHome ? `#${id}` : `/#${id}`);
-  const pick = (id: string) => {
+  const pick = (e: React.MouseEvent, id: string) => {
     if (!onHome) return;
+    // Scroll ourselves so "Home" lands at the exact top (not the hero's offset) with the same easing.
+    e.preventDefault();
+    history.replaceState(null, "", id === "top" ? location.pathname : `#${id}`);
+    scrollToSection(id);
     // Hold the elbow on the clicked item while the page scrolls past the sections in between.
-    lockUntil.current = Date.now() + 1000;
+    lockUntil.current = Date.now() + 1500;
     setSpied(id);
     setOpenOn(null);
   };
@@ -63,7 +68,7 @@ export default function Nav() {
   return (
     <header className="nav wrap">
       <div className="inner nav-row">
-        <Link href="/" className="wordmark" aria-label="HeavyTech home" onClick={() => pick("top")}>
+        <Link href="/" className="wordmark" aria-label="HeavyTech home" onClick={(e) => pick(e, "top")}>
           HeavyTech
         </Link>
         <nav aria-label="Sections" className="nav-stack" style={{ ["--row" as string]: `${ROW}px` }}>
@@ -73,7 +78,7 @@ export default function Nav() {
               <li key={item.id}>
                 <a
                   href={href(item.id)}
-                  onClick={() => pick(item.id)}
+                  onClick={(e) => pick(e, item.id)}
                   aria-current={item.id === active ? "true" : undefined}
                 >
                   {item.label}
@@ -102,7 +107,7 @@ export default function Nav() {
         <ul>
           {nav.map((item, i) => (
             <li key={item.id}>
-              <a href={href(item.id)} onClick={() => pick(item.id)} aria-current={item.id === active ? "true" : undefined}>
+              <a href={href(item.id)} onClick={(e) => pick(e, item.id)} aria-current={item.id === active ? "true" : undefined}>
                 <span className="label">[ {String(i + 1).padStart(2, "0")} ]</span>
                 <span className="display h-m">{item.label}</span>
               </a>

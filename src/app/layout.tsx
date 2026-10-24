@@ -3,8 +3,10 @@ import { Martian_Mono, Tomorrow } from "next/font/google";
 import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
 import ScrollReveal from "@/components/ScrollReveal";
+import SmoothScroll from "@/components/SmoothScroll";
 import { revealScript, themeScript } from "@/lib/inline-scripts";
 import { site } from "@/data/site";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 import "./components.css";
 
@@ -45,6 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main id="main">{children}</main>
         <Footer />
         <ScrollReveal />
+        <SmoothScroll />
       </body>
     </html>
   );
