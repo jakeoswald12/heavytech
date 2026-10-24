@@ -91,7 +91,6 @@
 
 /* Anchored sections land below the sticky header. */
 main [id] { scroll-margin-top: 128px; }
-main #top { scroll-margin-top: 0; }
 @media (max-width: 980px) { main [id] { scroll-margin-top: 64px; } }
 
 /* ---------- home hero ---------- */
