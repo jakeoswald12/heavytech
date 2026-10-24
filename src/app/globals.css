@@ -15,7 +15,7 @@
   --accent: #f2b20d;
   --on-accent: #111110;
   --glow: rgba(255, 236, 200, 0.06);
-  --grain-opacity: 0.16;
+  --grain: url("/textures/grain-dark.png");
   --gutter: max(16px, 1.6vw);
   color-scheme: dark;
 }
@@ -31,7 +31,7 @@
     --accent: #c98c00;
     --on-accent: #111110;
     --glow: rgba(255, 255, 255, 0.6);
-    --grain-opacity: 0.12;
+    --grain: url("/textures/grain-light.png");
     color-scheme: light;
   }
 }
@@ -46,7 +46,7 @@
   --accent: #c98c00;
   --on-accent: #111110;
   --glow: rgba(255, 255, 255, 0.6);
-  --grain-opacity: 0.12;
+  --grain: url("/textures/grain-light.png");
   color-scheme: light;
 }
 
@@ -76,16 +76,12 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.4s, color 0.4s;
 }
-/* film grain over everything */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  pointer-events: none;
-  background-image: url("/textures/grain.png");
-  background-size: 200px 200px;
-  opacity: var(--grain-opacity);
+/* Fine film grain painted as part of the page background, so it sits behind text and images.
+   A 256px tile shown at 128px gives one grain pixel per device pixel on retina screens. */
+body, .band, .mobile-menu {
+  background-image: var(--grain);
+  background-size: 128px 128px;
+  background-attachment: fixed;
 }
 img { max-width: 100%; height: auto; }
 a { color: inherit; }

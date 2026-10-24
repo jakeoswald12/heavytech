@@ -41,14 +41,14 @@ src/
 public/
   images/              optimized renders and photos (WebP)
   models/              3D Gaussian splats (.splat)
-  textures/grain.png   film-grain overlay
+  textures/            film-grain tiles (dark and light)
 ```
 
 To edit copy, change `src/data/site.ts` or the page files. To add a machine, add an entry to `machines` in `src/data/site.ts`; its page is generated automatically.
 
 ## Design system
 
-- Dark-first: near-black charcoal `#0D0D0C` with a film-grain overlay; light mode is warm paper `#F3EEE8`. Visitors can switch with the toggle in the header; the choice is remembered.
+- Dark-first: near-black charcoal `#0D0D0C` with a fine film grain behind the content; light mode is warm paper `#F3EEE8`. Visitors can switch with the toggle in the header; the choice is remembered.
 - Headlines: Tomorrow, uppercase, tight tracking, kept to two to four words.
 - Body and labels: Martian Mono.
 - One accent: safety yellow `#F2B20D`.

@@ -126,7 +126,14 @@
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); }
   100% { box-shadow: 0 0 0 10px transparent; }
 }
+.hero-picker {
+  position: absolute;
+  right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  bottom: 136px;
+  z-index: 4;
+}
 @media (max-width: 700px) {
+  .hero-picker { right: auto; left: max(var(--gutter), env(safe-area-inset-left, 0px)); bottom: 192px; }
   .splat-poster { inset: 18% 0 26%; }
   .splat-ctl { left: 0; right: auto; align-items: flex-start; padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); bottom: 110px; }
 }
@@ -177,7 +184,7 @@
 /* ---------- machine cards ---------- */
 .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(30px, 5vw, 60px); }
 .machines-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
-.machine-card { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 28px 24px 30px; border-right: 1px solid var(--rule); text-decoration: none; min-width: 0; transition: background-color 0.3s; }
+.machine-card { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 28px 24px 30px; border-right: 1px solid var(--rule); min-width: 0; transition: background-color 0.3s; }
 .machine-card:last-child { border-right: 0; }
 .machine-card:hover { background: var(--bg-2); }
 .machine-img { aspect-ratio: 4 / 3; max-width: 100%; display: grid; place-items: center; }
@@ -187,7 +194,10 @@
 .machine-tags { display: flex; gap: 12px; align-items: center; }
 .machine-name { font-size: 40px; letter-spacing: -0.03em; line-height: 0.9; }
 .machine-summary { font-size: 13px; color: var(--fg-2); }
-.machine-more { color: var(--fg); margin-top: 6px; }
+.machine-name a { text-decoration: none; }
+.machine-name a:hover { color: var(--accent); }
+.machine-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.machine-actions .btn { padding: 10px 14px; }
 @media (max-width: 900px) {
   .machines-grid { grid-template-columns: 1fr; }
   .machine-card { border-right: 0; border-bottom: 1px solid var(--rule); padding-inline: 0; }

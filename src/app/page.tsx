@@ -1,18 +1,16 @@
 import Link from "next/link";
 import PowertrainTabs from "@/components/PowertrainTabs";
 import Reveal from "@/components/Reveal";
-import SplatViewer from "@/components/SplatViewer";
+import HeroViewer from "@/components/HeroViewer";
 import { JoinBand, MachineCard, NewsCard, Split } from "@/components/blocks";
 import { machines, news } from "@/data/site";
 
 export default function Home() {
-  const ht1 = machines[0];
-
   return (
     <>
-      <section className="hero wrap" aria-label="HT-1 compact track loader">
+      <section className="hero wrap" id="hero" aria-label="HeavyTech machines in 3D">
         <div className="hero-viewer">
-          {ht1.model ? <SplatViewer model={ht1.model} poster={ht1.hero.src} alt={ht1.hero.alt} /> : null}
+          <HeroViewer />
         </div>
         <div className="inner hero-inner">
           <div className="hero-top">
@@ -54,7 +52,7 @@ export default function Home() {
           </div>
           <div className="machines-grid">
             {machines.map((m, i) => (
-              <MachineCard key={m.slug} m={m} index={i} />
+              <MachineCard key={m.slug} m={m} index={i} show3D />
             ))}
           </div>
         </div>
