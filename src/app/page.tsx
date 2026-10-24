@@ -125,7 +125,7 @@ export default function Home() {
         <div className="machines-grid">
           {machines.map((m, i) => (
             <div key={m.slug} className="machine-cell">
-              <div data-reveal="up" style={stagger(150 + i * 140)}>
+              <div>
                 <MachineCard m={m} index={i} />
               </div>
             </div>

@@ -47,7 +47,7 @@ export default function FeatureRotator({ features, label }: { features: Feature[
         {features.map((f, i) => {
           const on = i === active;
           return (
-            <li key={f.title} className="rotator-item" data-active={on} data-reveal="up" style={{ "--d": `${200 + i * 80}ms` } as React.CSSProperties}>
+            <li key={f.title} className="rotator-item" data-active={on}>
               <button type="button" className="rotator-title" aria-expanded={on} onClick={() => choose(i)}>
                 <span className="label rotator-index">[ {String(i + 1).padStart(2, "0")} ]</span>
                 <span className="display h-s">{f.title}</span>

@@ -51,15 +51,13 @@ export default function NewsCarousel({ items, title }: { items: NewsItem[]; titl
         </div>
       </div>
       <div className="news-track" ref={track} tabIndex={0} aria-label="News articles">
-        {items.map((n, i) => (
+        {items.map((n) => (
           <a
             key={n.slug}
             href={n.href}
             className="news-card"
             target="_blank"
             rel="noopener"
-            data-reveal="right"
-            style={{ "--d": `${150 + Math.min(i, 3) * 110}ms` } as React.CSSProperties}
           >
             <div className="news-img">
               {/* eslint-disable-next-line @next/next/no-img-element */}

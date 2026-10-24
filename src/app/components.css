@@ -477,7 +477,7 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 .anno-labels[data-live="true"] { opacity: 1; }
 .anno { position: absolute; }
 .anno-left { left: -6%; top: 14%; }
-.anno-right-1 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 60px); top: 4%; }
+.anno-right-1 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 85px); top: 4%; }
 .anno-right-2 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 40px); top: 19%; }
 /* Callouts are quiet: title only until hovered (or clicked to pin open). */
 .anno-box {
