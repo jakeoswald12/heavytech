@@ -212,11 +212,16 @@ main [id] { scroll-margin-top: 0; }
 /* ---------- machine cards ---------- */
 .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(30px, 5vw, 60px); }
 .machines-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-.section-lineup .machines-grid { border: 0; }
+.section-lineup .machines-grid { border-left: 0; border-right: 0; }
 .rule-line { display: block; height: 1px; background: var(--rule); }
 .machine-card { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 28px 24px 30px; border-right: 1px solid var(--rule); min-width: 0; transition: background-color 0.3s; }
-.machine-cell { display: grid; min-width: 0; }
-.machine-card:last-child, .machine-cell:last-child .machine-card { border-right: 0; }
+.machine-card:last-child { border-right: 0; }
+/* Lineup: each machine has its own fixed cell; only the content inside eases in. */
+.machine-cell { display: grid; min-width: 0; border-right: 1px solid var(--rule); }
+.machine-cell:last-child { border-right: 0; }
+.machine-cell > div { display: grid; }
+.machine-cell .machine-card { border-right: 0; height: 100%; }
+@media (max-width: 900px) { .machine-cell { border-right: 0; border-bottom: 1px solid var(--rule); } .machine-cell:last-child { border-bottom: 0; } .machine-cell .machine-card { border-bottom: 0; } }
 .machine-img { position: relative; aspect-ratio: 4 / 3; max-width: 100%; display: grid; place-items: center; }
 .splat-bare .splat-poster { inset: 4%; max-width: 92%; max-height: 92%; }
 .machine-img img { max-height: 100%; object-fit: contain; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
@@ -359,14 +364,13 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 [data-reveal] {
   transition:
     opacity 1s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--d, 0ms);
 }
 .reveal-ready [data-reveal]:not([data-shown]) { opacity: 0; }
-.reveal-ready [data-reveal="up"]:not([data-shown]) { transform: translate3d(0, 28px, 0); filter: blur(6px); }
-.reveal-ready [data-reveal="right"]:not([data-shown]) { transform: translate3d(36px, 0, 0); filter: blur(4px); }
-.reveal-ready [data-reveal="fade"]:not([data-shown]) { transform: scale(1.035); filter: blur(8px); }
+.reveal-ready [data-reveal="up"]:not([data-shown]) { transform: translate3d(0, 28px, 0); }
+.reveal-ready [data-reveal="right"]:not([data-shown]) { transform: translate3d(36px, 0, 0); }
+.reveal-ready [data-reveal="fade"]:not([data-shown]) { transform: scale(1.02); }
 [data-reveal="line"] { transform-origin: left center; transition: transform 1.4s cubic-bezier(0.65, 0, 0.35, 1); transition-delay: var(--d, 0ms); }
 .reveal-ready [data-reveal="line"]:not([data-shown]) { opacity: 1; transform: scaleX(0); }
 @media (prefers-reduced-motion: reduce) {

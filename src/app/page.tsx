@@ -122,15 +122,15 @@ export default function Home() {
             </h2>
           </div>
         </div>
-        <span className="rule-line" data-reveal="line" />
         <div className="machines-grid">
           {machines.map((m, i) => (
-            <div key={m.slug} className="machine-cell" data-reveal="up" style={stagger(150 + i * 140)}>
-              <MachineCard m={m} index={i} />
+            <div key={m.slug} className="machine-cell">
+              <div data-reveal="up" style={stagger(150 + i * 140)}>
+                <MachineCard m={m} index={i} />
+              </div>
             </div>
           ))}
         </div>
-        <span className="rule-line" data-reveal="line" style={stagger(300)} />
       </section>
 
       {/* ---------- Technology ---------- */}
