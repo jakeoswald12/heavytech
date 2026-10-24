@@ -5,5 +5,5 @@ import SplatViewer from "./SplatViewer";
 export default function HeroViewer() {
   const m = machines.find((x) => x.slug === "ht-1" && x.model);
   if (!m?.model) return null;
-  return <SplatViewer model={m.model} poster={m.hero.src} alt={m.hero.alt} showStatus={false} annotations={ht1Annotations} />;
+  return <SplatViewer model={m.model} poster={m.hero.src} alt={m.hero.alt} showStatus={false} annotations={ht1Annotations} bleed={0.3} />;
 }

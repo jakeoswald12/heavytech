@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Martian_Mono, Tomorrow } from "next/font/google";
 import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
-import { themeScript } from "@/components/ThemeToggle";
+import ScrollReveal from "@/components/ScrollReveal";
+import { revealScript, themeScript } from "@/lib/inline-scripts";
 import { site } from "@/data/site";
 import "./globals.css";
 import "./components.css";
@@ -34,7 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${tomorrow.variable} ${martian.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeScript + revealScript }} />
       </head>
       <body>
         <a className="skip-link" href="#main">
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Nav />
         <main id="main">{children}</main>
         <Footer />
+        <ScrollReveal />
       </body>
     </html>
   );

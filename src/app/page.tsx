@@ -3,6 +3,7 @@ import HeroViewer from "@/components/HeroViewer";
 import FeatureRotator, { type Feature } from "@/components/FeatureRotator";
 import NewsCarousel from "@/components/NewsCarousel";
 import { MachineCard } from "@/components/blocks";
+import { stagger } from "@/components/Reveal";
 import { machines, news, site } from "@/data/site";
 
 const technology: Feature[] = [
@@ -85,7 +86,7 @@ const company: Feature[] = [
 /** Section eyebrow: bracketed index plus name, matching the nav order. */
 function Eyebrow({ n, children }: { n: number; children: React.ReactNode }) {
   return (
-    <span className="label">
+    <span className="label" data-reveal="up">
       [ {String(n).padStart(2, "0")} ] {children}
     </span>
   );
@@ -116,14 +117,20 @@ export default function Home() {
         <div className="wrap">
           <div className="inner head-stack lineup-head">
             <Eyebrow n={1}>Machines</Eyebrow>
-            <h2 className="display h-l">The lineup.</h2>
+            <h2 className="display h-l" data-reveal="up" style={stagger(90)}>
+              The lineup.
+            </h2>
           </div>
         </div>
+        <span className="rule-line" data-reveal="line" />
         <div className="machines-grid">
           {machines.map((m, i) => (
-            <MachineCard key={m.slug} m={m} index={i} />
+            <div key={m.slug} className="machine-cell" data-reveal="up" style={stagger(150 + i * 140)}>
+              <MachineCard m={m} index={i} />
+            </div>
           ))}
         </div>
+        <span className="rule-line" data-reveal="line" style={stagger(300)} />
       </section>
 
       {/* ---------- Technology ---------- */}
@@ -131,7 +138,7 @@ export default function Home() {
         <div className="inner feature-inner">
           <div className="head-stack">
             <Eyebrow n={2}>Technology</Eyebrow>
-            <h2 className="display h-l one-line">A new architecture.</h2>
+            <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>A new architecture.</h2>
           </div>
           <FeatureRotator features={technology} label="Technology features" />
         </div>
@@ -142,8 +149,8 @@ export default function Home() {
         <div className="inner feature-inner">
           <div className="head-stack">
             <Eyebrow n={3}>Service</Eyebrow>
-            <h2 className="display h-l one-line">Right to repair.</h2>
-            <p className="lede">
+            <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>Right to repair.</h2>
+            <p className="lede" data-reveal="up" style={stagger(180)}>
               The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and
               full service documentation let operators, fleet mechanics and independent shops keep the machine working without
               proprietary tools.
@@ -158,8 +165,8 @@ export default function Home() {
         <div className="inner feature-inner">
           <div className="head-stack">
             <Eyebrow n={4}>Company</Eyebrow>
-            <h2 className="display h-l one-line">Made in the Midwest.</h2>
-            <p className="lede">
+            <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>Made in the Midwest.</h2>
+            <p className="lede" data-reveal="up" style={stagger(180)}>
               HeavyTech was founded by industry experts and engineers who saw an industry overdue for a new approach: powerful,
               high-performance machines that are affordable and practical to own, designed from a blank sheet and built in Fort
               Wayne, Indiana.
@@ -177,7 +184,9 @@ export default function Home() {
             title={
               <div className="head-stack">
                 <Eyebrow n={5}>News</Eyebrow>
-                <h2 className="display h-l">Field notes.</h2>
+                <h2 className="display h-l" data-reveal="up" style={stagger(90)}>
+                  Field notes.
+                </h2>
               </div>
             }
           />
@@ -187,10 +196,16 @@ export default function Home() {
       {/* ---------- Join ---------- */}
       <section className="section wrap join">
         <div className="inner join-grid">
-          <span className="label">Reservations · Dealers · Investors</span>
-          <h2 className="display h-l">Join the build.</h2>
-          <p className="lede">Reserve a machine, ask about becoming a dealer, or follow along as the first HT-1 comes together.</p>
-          <div className="ctas">
+          <span className="label" data-reveal="up">
+            Reservations · Dealers · Investors
+          </span>
+          <h2 className="display h-l" data-reveal="up" style={stagger(90)}>
+            Join the build.
+          </h2>
+          <p className="lede" data-reveal="up" style={stagger(180)}>
+            Reserve a machine, ask about becoming a dealer, or follow along as the first HT-1 comes together.
+          </p>
+          <div className="ctas" data-reveal="up" style={stagger(270)}>
             <Link className="btn btn-solid" href="/reserve/">
               Reserve an HT-1 <span aria-hidden="true">↗</span>
             </Link>

@@ -57,7 +57,7 @@ export type Annotation = {
 
 export const ht1Annotations: Annotation[] = [
   {
-    title: "Swappable power module",
+    title: "Swappable powertrain",
     text: "Battery, hybrid or plug-in hybrid. Swaps at the rear.",
     slot: "left",
     anchor: [0, -0.05, -0.42],

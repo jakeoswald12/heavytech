@@ -19,6 +19,7 @@ export default function SplatViewer({
   bare = false,
   showStatus = !bare,
   annotations = NO_ANNOTATIONS,
+  bleed = 0,
 }: {
   model: SplatModel;
   poster: string;
@@ -32,6 +33,11 @@ export default function SplatViewer({
   showStatus?: boolean;
   /** CAD-style callouts whose leader lines stay pinned to points on the model. */
   annotations?: Annotation[];
+  /**
+   * Let the canvas run this fraction of the stage height past its bottom edge, so a model that sits
+   * low isn't cropped. The model keeps exactly the same size and position as without bleed.
+   */
+  bleed?: number;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,6 +45,16 @@ export default function SplatViewer({
   const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const frontRefs = useRef<(SVGGElement | null)[]>([]);
   const backRefs = useRef<(SVGGElement | null)[]>([]);
+  // Callouts: one can be pinned open by a click; any click elsewhere closes it.
+  const [pinned, setPinned] = useState<number | null>(null);
+  useEffect(() => {
+    if (pinned === null) return;
+    const close = (e: PointerEvent) => {
+      if (!(e.target as Element).closest?.(".anno-box")) setPinned(null);
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [pinned]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -86,11 +102,27 @@ export default function SplatViewer({
         camera.position.set(1.55, 0.75, 1.65);
         // Cards aim slightly low so the machine sits centered in its frame instead of running off the bottom.
         controls.target.set(0, bare ? -0.05 : 0, 0);
+        const BASE_FOV = 32;
+        let canvasH = 0;
         const size = () => {
           const w = stage.clientWidth;
           const h = stage.clientHeight;
-          renderer.setSize(w, h, false);
-          camera.aspect = w / h;
+          canvasH = Math.round(h * (1 + bleed));
+          renderer.setSize(w, canvasH, false);
+          if (bleed > 0) {
+            // Render a taller canvas without changing what the stage-sized view shows: widen the
+            // vertical field of view to a virtual frame centred where the stage centre was, then crop it
+            // so the original view fills the top of the canvas and the extra rows hang below.
+            const virtualH = 2 * canvasH - h;
+            const t = Math.tan(((BASE_FOV / 2) * Math.PI) / 180) * (virtualH / h);
+            camera.fov = (2 * Math.atan(t) * 180) / Math.PI;
+            camera.aspect = w / virtualH;
+            camera.setViewOffset(w, virtualH, 0, virtualH - canvasH, w, canvasH);
+          } else {
+            camera.fov = BASE_FOV;
+            camera.aspect = w / h;
+            camera.clearViewOffset();
+          }
           camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.1 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
         };
@@ -104,12 +136,8 @@ export default function SplatViewer({
             return { x: (a.slot === "left" ? r.right : r.left) - s.left, y: r.bottom - s.top };
           });
         };
-        const sizeAll = () => {
-          size();
-          measureLabels();
-        };
-        sizeAll();
-        const ro = new ResizeObserver(sizeAll);
+        size();
+        const ro = new ResizeObserver(size);
         ro.observe(stage);
 
         const mesh = new SplatMesh({ url: model.src });
@@ -132,8 +160,10 @@ export default function SplatViewer({
         const quat = new THREE.Quaternion();
         const placeLines = () => {
           if (!annotations.length) return;
+          // Labels grow and shrink as they open, so their underline ends are measured every frame.
+          measureLabels();
           const w = stage.clientWidth;
-          const h = stage.clientHeight;
+          const h = canvasH;
           mesh.getWorldQuaternion(quat);
           annotations.forEach((_, i) => {
             world.copy(anchors[i]);
@@ -208,7 +238,7 @@ export default function SplatViewer({
       near?.disconnect();
       cleanup();
     };
-  }, [model, compact, bare, annotations]);
+  }, [model, compact, bare, annotations, bleed]);
 
   // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
   const showPoster = status === "error";
@@ -234,7 +264,7 @@ export default function SplatViewer({
           className="splat-canvas"
           aria-label={`Interactive 3D view: ${alt}. Drag to rotate.`}
           data-live={status === "live"}
-          style={{ visibility: status === "error" ? "hidden" : "visible" }}
+          style={{ visibility: status === "error" ? "hidden" : "visible", height: bleed ? `${(1 + bleed) * 100}%` : undefined }}
         />
         {annotations.length ? (
           <>
@@ -248,12 +278,21 @@ export default function SplatViewer({
             </svg>
             <ol className="anno-labels" data-live={status === "live"} aria-label="Callouts">
               {annotations.map((a, i) => (
-                <li key={a.title} className={`anno anno-${a.slot}`}>
+                <li key={a.title} className={`anno anno-${a.slot}`} data-open={pinned === i}>
                   <div ref={(el) => void (labelRefs.current[i] = el)} className="anno-box">
-                    <span className="anno-title">
+                    <button
+                      type="button"
+                      className="anno-title"
+                      aria-expanded={pinned === i}
+                      onClick={() => setPinned((p) => (p === i ? null : i))}
+                    >
                       <span className="anno-n">{String(i + 1).padStart(2, "0")}</span> — {a.title}
+                    </button>
+                    <span className="anno-body">
+                      <span className="anno-text">
+                        <span>{a.text}</span>
+                      </span>
                     </span>
-                    <span className="anno-text">{a.text}</span>
                   </div>
                 </li>
               ))}
