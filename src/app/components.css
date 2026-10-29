@@ -583,3 +583,8 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 @media (hover: none) {
   .nav-actions .btn-ghost:hover { background: transparent; color: var(--fg); }
 }
+
+/* Founder questions page */
+.q-list { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--rule); }
+.q-list li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; padding-block: 20px; border-bottom: 1px solid var(--rule); }
+.q-list p { margin: 0; color: var(--fg); max-width: 64ch; }
