@@ -194,13 +194,13 @@ const fresnel = (color, power, strength, extra = {}) =>
   });
 
 const phys = (o) => new THREE.MeshPhysicalMaterial({ envMapIntensity: 1, side: THREE.DoubleSide, ...o });
-const YELLOW = 0xf0a400;
+const YELLOW = 0x8c5800;
 const STYLES = {
   studio: {
     name: "Studio", bg: 0x0d0d0c, env: 1.0, key: 2.2, hemi: 0.3, rim: 2.4, shadow: 0.55, grid: false, tone: 1.0, logo: true,
     mats: () => {
       // Gloss powder coat: smooth base under a hard clear layer, so the environment reflects in it.
-      const yellow = phys({ color: YELLOW, roughness: 0.36, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.22 });
+      const yellow = phys({ color: YELLOW, roughness: 0.38, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.25 });
       const black = phys({ color: 0x111111, roughness: 0.55, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.45 });
       return {
         cab: yellow, pack: yellow,
