@@ -61,6 +61,7 @@ export default function SmoothScroll() {
     let moving = false;
     let queued: 1 | -1 | 0 = 0; // a swipe that arrived mid-glide runs as soon as the glide ends
     let stepAt = -Infinity;
+    let failsafe: ReturnType<typeof setTimeout> | undefined;
     const step = (dir: 1 | -1) => {
       const y = window.scrollY;
       const s = stops();
@@ -68,11 +69,19 @@ export default function SmoothScroll() {
       if (target === undefined) return;
       moving = true;
       stepAt = lastWheel;
+      // Failsafe: if the glide is ever cut short (Lenis skips or drops it), don't stay "moving" and
+      // swallow every later scroll; free the stepper shortly after the glide should have ended.
+      clearTimeout(failsafe);
+      failsafe = setTimeout(() => {
+        moving = false;
+        queued = 0;
+      }, SNAP_DURATION * 1000 + 400);
       lenis.scrollTo(target, {
         duration: SNAP_DURATION,
         easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
         lock: true,
         onComplete: () => {
+          clearTimeout(failsafe);
           moving = false;
           const next = queued;
           queued = 0;
@@ -154,6 +163,7 @@ export default function SmoothScroll() {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
       footerSize.disconnect();
+      clearTimeout(failsafe);
       lenis.destroy();
       instance = null;
     };
