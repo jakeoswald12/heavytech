@@ -35,7 +35,10 @@ const GESTURE_GAP = 220; // ms of wheel silence that ends one gesture (absorbs t
 export default function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const snap = window.matchMedia(SNAP_QUERY);
+    const query = window.matchMedia(SNAP_QUERY);
+    // Only pages that mark their sections (the home page) step section by section; every other page
+    // scrolls normally.
+    const snap = { get matches() { return query.matches && !!document.querySelector("[data-snap]"); } };
     const lenis = new Lenis({
       autoRaf: true,
       lerp: 0.085, // lower = softer, longer glide
