@@ -593,12 +593,11 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 
 /* ---------- Technology: 3D HT-1 with the featured system lit up ---------- */
 .tech-model { position: absolute; inset: 0; }
-/* Desktop: the model's frame spans the section's right side from the title down, and it is taken out of
-   the list's layout so opening a longer feature never resizes (and so never re-frames) the 3D view. */
-@media (min-width: 861px) {
-  #technology .feature-inner { position: relative; }
-  #technology .rotator, #technology .rotator-media.is-model { position: static; }
-  #technology .tech-model { top: 0; bottom: -44px; left: 40%; right: 0; }
-}
+/* Wide screens: Technology and Service share one model, pinned full-height on the right while both
+   sections scroll. It sits outside the lists' layout, so opening a longer feature never re-frames it. */
+.model-pair { position: relative; }
+.model-stage { position: absolute; top: 0; bottom: 0; left: 40%; right: 0; z-index: 1; pointer-events: none; }
+.model-stage-pin { position: sticky; top: 0; height: 100svh; }
+@media (max-width: 860px) { .model-stage { display: none; } }
 .tech-model-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.8s ease; }
 .tech-model[data-live="true"] .tech-model-canvas { opacity: 1; }

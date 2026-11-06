@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** One feature's view: which parts are shown as a studio render, and where the camera sits. */
+/** One feature's view: which parts are picked out in blueprint style, and where the camera sits. */
 export type FeatureView = {
   /** Base parts ("pack", "arm", "bucket") and/or feature tags ("controls", "pumps") to light up. */
   highlight: string[];
@@ -17,7 +17,8 @@ const DURATION = 1400; // ms for the camera to swing between features
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /**
- * The HT-1 drawn as a frosted, see-through shell with one system picked out in the full studio look.
+ * The HT-1 drawn as a frosted, see-through shell with one system picked out blueprint-style: solid
+ * dark faces with gold outlines (so even black parts read clearly).
  * When `active` changes the camera swings to that feature's angle and the highlight moves with it.
  * Falls back to the feature images when WebGL isn't available.
  */
@@ -25,10 +26,16 @@ export default function TechModel({
   active,
   views,
   fallback,
+  dist = 2.1,
+  shiftY = 0,
 }: {
   active: number;
   views: FeatureView[];
   fallback: { src: string; alt: string }[];
+  /** Camera distance; larger frames want the camera further back. */
+  dist?: number;
+  /** Lens shift as a fraction of the frame height (positive moves the machine up). */
+  shiftY?: number;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -114,32 +121,44 @@ export default function TechModel({
           const t = document.documentElement.dataset.theme;
           return t ? t === "light" : window.matchMedia("(prefers-color-scheme: light)").matches;
         };
+        // Highlight: opaque faces in the page colour, outlined in gold.
+        const fill = new THREE.MeshBasicMaterial({ color: 0x0f0f0e, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+        const line = new THREE.LineBasicMaterial({ color: 0xf2b20d, transparent: true, opacity: 0.9 });
         const tint = () => {
           const light = isLight();
           shell.color.set(light ? 0x2c2a27 : 0xf4f4f2);
           shell.emissive.set(light ? 0x000000 : 0x1a1a1a);
           shell.opacity = light ? 0.14 : 0.17;
+          fill.color.set(light ? 0xf3eee8 : 0x0f0f0e);
+          line.color.set(light ? 0xb07a00 : 0xf2b20d);
         };
         tint();
         const themeWatch = new MutationObserver(tint);
         themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-        const gold = look.studioMaterials(THREE).pack;
-        const meshes: { m: InstanceType<typeof THREE.Mesh>; part: string; tag: string; studio: InstanceType<typeof THREE.Material> }[] = [];
+        type Entry = { m: InstanceType<typeof THREE.Mesh>; part: string; tag: string; edges?: InstanceType<typeof THREE.LineSegments> };
+        const meshes: Entry[] = [];
         inner.traverse((o) => {
           const m = o as InstanceType<typeof THREE.Mesh>;
           if (!m.isMesh || m === wordmark) return;
-          const tag = look.tagOf(m);
-          // The motor-pump units are black parts deep inside the machine; gold makes them read through the shell.
-          const studio = tag === "pumps" ? gold : (m.material as InstanceType<typeof THREE.Material>);
-          meshes.push({ m, part: look.partOf(m), tag, studio });
+          meshes.push({ m, part: look.partOf(m), tag: look.tagOf(m) });
         });
+        // Outlines are built the first time a part is highlighted, then kept.
+        const edgesFor = (x: Entry) => {
+          if (!x.edges) {
+            x.edges = new THREE.LineSegments(new THREE.EdgesGeometry(x.m.geometry, 28), line);
+            x.m.add(x.edges);
+          }
+          return x.edges;
+        };
         const highlight = (i: number) => {
           const on = new Set(views[i]?.highlight ?? []);
           for (const x of meshes) {
             const lit = on.has(x.part) || (x.tag !== "" && on.has(x.tag));
-            x.m.material = lit ? x.studio : x.part === "glass" ? hidden : shell;
+            x.m.material = lit ? fill : x.part === "glass" ? hidden : shell;
             x.m.castShadow = lit;
+            if (lit) edgesFor(x).visible = true;
+            else if (x.edges) x.edges.visible = false;
           }
           wordmark.visible = on.has("arm");
         };
@@ -148,8 +167,7 @@ export default function TechModel({
         const target = new THREE.Vector3(0, -0.13, 0);
         let az = views[0].az, el = views[0].el;
         let from = { az, el }, to = { az, el }, t0 = 0, shown = -1;
-        // Close enough that the machine fills the tall right-hand frame (cab roof near the section title).
-        const DIST = 2.1;
+        const DIST = dist;
         const place = (a: number, e: number) => {
           camera.position.set(Math.sin(a) * Math.cos(e) * DIST, target.y + Math.sin(e) * DIST, Math.cos(a) * Math.cos(e) * DIST);
           camera.lookAt(target);
@@ -164,6 +182,8 @@ export default function TechModel({
           camera.aspect = w / h;
           // Pull back on tall, narrow frames so the whole machine stays in view.
           camera.zoom = Math.min(1, w / h / 1.45) * (window.innerWidth < 861 ? 0.82 : 1);
+          if (shiftY) camera.setViewOffset(w, h, 0, shiftY * h, w, h);
+          else camera.clearViewOffset();
           camera.updateProjectionMatrix();
         };
         size();
@@ -227,7 +247,7 @@ export default function TechModel({
       near.disconnect();
       cleanup();
     };
-  }, [views]);
+  }, [views, dist, shiftY]);
 
   return (
     <div ref={stageRef} className="tech-model" data-live={status === "live"}>

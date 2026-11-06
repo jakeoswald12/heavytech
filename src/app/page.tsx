@@ -1,3 +1,4 @@
+import StickyModel, { type StageSection } from "@/components/StickyModel";
 import Link from "next/link";
 import HeroViewer from "@/components/HeroViewer";
 import FeatureRotator, { type Feature } from "@/components/FeatureRotator";
@@ -11,7 +12,7 @@ const technology: Feature[] = [
     title: "Software-defined controls",
     body: "Real-time diagnostics, seamless upgrades and an intuitive operator interface. The machine isolates a problem to a subsystem and tells the technician.",
     image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
-    view: { highlight: ["controls"], az: 2.54, el: 0.45 },
+    view: { highlight: ["controls", "diag"], az: 2.54, el: 0.45 },
   },
   {
     title: "Machine vision",
@@ -50,22 +51,31 @@ const service: Feature[] = [
     title: "Removable panels",
     body: "Swing-out service doors and panels that come off, so nothing is buried behind something else.",
     image: { src: "/images/machines/ctl_access.webp", alt: "HT-1 with service panels open showing the power module" },
+    view: { highlight: ["panels"], az: -1.0, el: 0.3 },
   },
   {
     title: "Labeled wiring",
     body: "Clearly labeled harnesses and modular subsystems that can be traced and swapped in the field.",
     image: { src: "/images/technology/guts.webp", alt: "HeavyTech power module with labeled wiring" },
+    view: { highlight: ["wiring"], az: 2.6, el: 0.5 },
   },
   {
     title: "Open diagnostics",
     body: "The machine points the technician to the subsystem. No dealer-only laptop required.",
     image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
+    view: { highlight: ["diag"], az: 2.2, el: 0.6 },
   },
   {
     title: "Standard parts",
     body: "Commercially available components wherever practical, so parts can be found locally.",
     image: { src: "/images/technology/slide2.webp", alt: "Commercially available electric motor and pump" },
+    view: { highlight: ["metal"], az: -1.75, el: 0.12 },
   },
+];
+
+const stageSections: StageSection[] = [
+  { id: "technology", views: technology.map((f) => f.view!), fallback: technology.map((f) => f.image) },
+  { id: "service", views: service.map((f) => f.view!), fallback: service.map((f) => f.image) },
 ];
 
 const company: Feature[] = [
@@ -141,32 +151,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------- Technology ---------- */}
-      <section className="feature-section wrap" id="technology">
-        <div className="inner feature-inner">
-          <div className="head-stack">
-            <Eyebrow n={2}>Technology</Eyebrow>
-            <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>A new architecture.</h2>
+      {/* Technology and Service share one 3D HT-1 that stays pinned on the right while both scroll by. */}
+      <div className="model-pair">
+        <StickyModel sections={stageSections} />
+        {/* ---------- Technology ---------- */}
+        <section className="feature-section wrap" id="technology">
+          <div className="inner feature-inner">
+            <div className="head-stack">
+              <Eyebrow n={2}>Technology</Eyebrow>
+              <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>A new architecture.</h2>
+            </div>
+            <FeatureRotator features={technology} label="Technology features" stageId="technology" />
           </div>
-          <FeatureRotator features={technology} label="Technology features" />
-        </div>
-      </section>
+        </section>
 
-      {/* ---------- Service ---------- */}
-      <section className="feature-section wrap" id="service">
-        <div className="inner feature-inner">
-          <div className="head-stack">
-            <Eyebrow n={3}>Service</Eyebrow>
-            <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>Right to repair.</h2>
-            <p className="lede" data-reveal="up" style={stagger(180)}>
-              The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and
-              full service documentation let operators, fleet mechanics and independent shops keep the machine working without
-              proprietary tools.
-            </p>
+        {/* ---------- Service ---------- */}
+        <section className="feature-section wrap" id="service">
+          <div className="inner feature-inner">
+            <div className="head-stack">
+              <Eyebrow n={3}>Service</Eyebrow>
+              <h2 className="display h-l one-line" data-reveal="up" style={stagger(90)}>Right to repair.</h2>
+              <p className="lede" data-reveal="up" style={stagger(180)}>
+                The people who operate and depend on their machines every day should be able to repair them. Open diagnostics and
+                full service documentation let operators, fleet mechanics and independent shops keep the machine working without
+                proprietary tools.
+              </p>
+            </div>
+            <FeatureRotator features={service} label="Service features" stageId="service" />
           </div>
-          <FeatureRotator features={service} label="Service features" />
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* ---------- Company ---------- */}
       <section className="feature-section wrap" id="company">

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { getWide, modelStage, subscribeWide } from "@/lib/modelStage";
 import TechModel, { type FeatureView } from "./TechModel";
 
 export type Feature = {
@@ -20,13 +21,27 @@ const INTERVAL = 4000;
  * and expanded; every four seconds the next one opens and the image crossfades, until the visitor
  * picks a feature. From then on it stays where they put it. Hovering the list pauses the timer.
  */
-export default function FeatureRotator({ features, label }: { features: Feature[]; label: string }) {
+export default function FeatureRotator({
+  features,
+  label,
+  stageId,
+}: {
+  features: Feature[];
+  label: string;
+  /** With a 3D model, wide screens show it in the shared sticky stage (StickyModel) under this id. */
+  stageId?: string;
+}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [chosen, setChosen] = useState(false); // once the visitor clicks, auto-rotation stops for good
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const views = useMemo(() => (features.every((f) => f.view) ? features.map((f) => f.view as FeatureView) : null), [features]);
   const fallback = useMemo(() => features.map((f) => f.image), [features]);
+  const wide = useSyncExternalStore(subscribeWide, getWide, () => true);
+  const shared = !!views && !!stageId && wide;
+  useEffect(() => {
+    if (stageId) modelStage.setActive(stageId, active);
+  }, [stageId, active]);
 
   const choose = useCallback((i: number) => {
     setChosen(true);
@@ -67,7 +82,7 @@ export default function FeatureRotator({ features, label }: { features: Feature[
         })}
       </ol>
       <div className={`rotator-media${views ? " is-model" : ""}`} data-reveal="fade" style={{ "--d": "250ms" } as React.CSSProperties}>
-        {views ? (
+        {shared ? null : views ? (
           <TechModel active={active} views={views} fallback={fallback} />
         ) : features.map((f, i) => (
           // eslint-disable-next-line @next/next/no-img-element
