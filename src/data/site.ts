@@ -29,6 +29,8 @@ export const nav = [
 ];
 
 export type SplatModel = {
+  /** "splat" (default): Gaussian splat. "glb": the CAD mesh, rendered in the studio look. */
+  kind?: "splat" | "glb";
   src: string;
   rotX: number;
   rotY: number;
@@ -77,6 +79,19 @@ export const ht1Annotations: Annotation[] = [
     anchor: [0.268, -0.029, -0.094],
     normal: [1, 0, 0],
   },
+];
+
+/**
+ * HT-1 from the founder's CAD (HT-1 Main Assembly P2), converted to a 1.7 MB mesh and styled in
+ * /lab/ht1. For the GLB, `scale` is the machine's length in scene units and `rotY` turns it to face the camera.
+ */
+export const ht1CadModel: SplatModel = { kind: "glb", src: "/models/ht1-cad.glb", rotX: 0, rotY: -2.73, scale: 1.3, y: 0.05 };
+
+/** The hero callouts, pinned to the CAD model (anchors in the GLB's own metres). */
+export const ht1CadAnnotations: Annotation[] = [
+  { ...ht1Annotations[0], anchor: [0, 0.62, 2.196], normal: [0, 0, 1] }, // rear face of the power pack
+  { ...ht1Annotations[1], anchor: [0, 1.95, 0.21], normal: [0, 1, 0] }, // sensor puck on the cab roof
+  { ...ht1Annotations[2], anchor: [0.836, 0.836, 0.496], normal: [1, 0, 0] }, // outer face of the lift arm
 ];
 
 export type Machine = {

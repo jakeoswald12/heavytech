@@ -74,16 +74,15 @@ export default function SplatViewer({
       try {
         const THREE = await import("three");
         const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
-        const { SparkRenderer, SplatMesh } = await import("@sparkjsdev/spark");
         if (disposed) return;
+        const isMesh = model.kind === "glb";
 
         const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: isMesh, alpha: true });
         renderer.setClearColor(0x000000, 0);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 100);
-        scene.add(new SparkRenderer({ renderer }));
 
         const controls = new OrbitControls(camera, canvas);
         // OrbitControls claims every touch (touch-action: none), which blocks page scrolling on phones.
@@ -152,16 +151,91 @@ export default function SplatViewer({
         const ro = new ResizeObserver(size);
         ro.observe(stage);
 
-        const mesh = new SplatMesh({ url: model.src });
-        mesh.rotation.set(model.rotX, model.rotY, 0);
-        mesh.scale.setScalar(model.scale);
-        mesh.position.y = model.y;
-        scene.add(mesh);
-        mesh.initialized
-          .then(() => !disposed && setStatus("live"))
-          .catch(() => {
-            if (!disposed) setStatus("error");
-          });
+        // The model. `mesh` is the object whose own space the annotation anchors are written in.
+        let mesh: InstanceType<typeof THREE.Object3D>;
+        let onFrame = () => {};
+        let disposeExtra = () => {};
+        if (isMesh) {
+          // CAD mesh in the studio look: environment reflections, a key light that casts a soft shadow,
+          // a rim light, and a faint pool of light on the ground.
+          const [{ GLTFLoader }, { MeshoptDecoder }, { RoomEnvironment }, look] = await Promise.all([
+            import("three/examples/jsm/loaders/GLTFLoader.js"),
+            import("three/examples/jsm/libs/meshopt_decoder.module.js"),
+            import("three/examples/jsm/environments/RoomEnvironment.js"),
+            import("@/lib/cadLook"),
+          ]);
+          if (disposed) return;
+          renderer.toneMapping = THREE.NeutralToneMapping;
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          const pmrem = new THREE.PMREMGenerator(renderer);
+          const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+          scene.environment = env;
+
+          const key = new THREE.DirectionalLight(0xffffff, 2.2);
+          key.castShadow = true;
+          key.shadow.mapSize.setScalar(stage.clientWidth < 700 ? 1024 : 2048);
+          key.shadow.bias = -0.0004;
+          key.shadow.normalBias = 0.02;
+          key.shadow.radius = 6;
+          Object.assign(key.shadow.camera, { left: -1.6, right: 1.6, top: 1.6, bottom: -1.6, near: 0.5, far: 12 });
+          const rim = new THREE.DirectionalLight(0xffffff, 2.4);
+          scene.add(key, key.target, rim, new THREE.HemisphereLight(0xffffff, 0x222222, 0.3));
+
+          const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(model.src);
+          if (disposed) return;
+          const inner = gltf.scene;
+          await look.styleCadModel(THREE, inner);
+          await look.addArmWordmark(THREE, inner, renderer);
+          if (disposed) return;
+          // Centre the machine on the origin and scale it so its length matches `model.scale`.
+          const box = new THREE.Box3().setFromObject(inner);
+          const c = box.getCenter(new THREE.Vector3());
+          const dims = box.getSize(new THREE.Vector3());
+          const k = model.scale / Math.max(dims.x, dims.z);
+          inner.position.set(-c.x, -c.y, -c.z);
+          const wrapper = new THREE.Group();
+          wrapper.add(inner);
+          wrapper.scale.setScalar(k);
+          wrapper.rotation.set(model.rotX, model.rotY, 0);
+          wrapper.position.y = model.y;
+          scene.add(wrapper);
+          const groundY = model.y + (box.min.y - c.y) * k;
+          const ground = look.makeGround(THREE, model.scale);
+          ground.position.y = groundY;
+          scene.add(ground);
+          key.target.position.set(0, groundY, 0);
+          mesh = inner;
+
+          // The light turns with the camera, so dragging reads as turning the machine under a fixed
+          // light: the shadow sweeps around on the ground while the light stays put on screen.
+          onFrame = () => {
+            const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
+            key.position.set(Math.sin(az + 0.9) * 4, groundY + 5, Math.cos(az + 0.9) * 4);
+            rim.position.set(Math.sin(az + Math.PI - 0.6) * 4, groundY + 3.5, Math.cos(az + Math.PI - 0.6) * 4);
+          };
+          disposeExtra = () => {
+            env.dispose();
+            pmrem.dispose();
+          };
+          setStatus("live");
+        } else {
+          const { SparkRenderer, SplatMesh } = await import("@sparkjsdev/spark");
+          if (disposed) return;
+          scene.add(new SparkRenderer({ renderer }));
+          const splat = new SplatMesh({ url: model.src });
+          splat.rotation.set(model.rotX, model.rotY, 0);
+          splat.scale.setScalar(model.scale);
+          splat.position.y = model.y;
+          scene.add(splat);
+          splat.initialized
+            .then(() => !disposed && setStatus("live"))
+            .catch(() => {
+              if (!disposed) setStatus("error");
+            });
+          mesh = splat;
+          disposeExtra = () => splat.dispose?.();
+        }
 
         // Annotation anchors in model space; re-projected to the screen every frame.
         const anchors = annotations.map((a) => new THREE.Vector3(...a.anchor));
@@ -212,6 +286,7 @@ export default function SplatViewer({
         renderer.setAnimationLoop(() => {
           if (!visible) return;
           controls.update();
+          onFrame();
           renderer.render(scene, camera);
           placeLines();
         });
@@ -221,7 +296,7 @@ export default function SplatViewer({
           ro.disconnect();
           io.disconnect();
           controls.dispose();
-          mesh.dispose?.();
+          disposeExtra();
           renderer.dispose();
         };
       } catch {
