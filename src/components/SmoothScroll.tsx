@@ -95,11 +95,19 @@ export default function SmoothScroll() {
       e.preventDefault();
       if (!moving) step(down ? 1 : -1);
     };
+    // The footer's height, for CSS that sizes the last section so it and the footer share one screen.
+    const footer = document.querySelector("footer");
+    const footerSize = new ResizeObserver(() => {
+      if (footer) document.documentElement.style.setProperty("--footer-h", `${footer.offsetHeight}px`);
+    });
+    if (footer) footerSize.observe(footer);
+
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
+      footerSize.disconnect();
       lenis.destroy();
       instance = null;
     };

@@ -615,6 +615,11 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
   .section-lineup .machine-img { aspect-ratio: auto; min-height: 0; height: 100%; }
   #news { height: 100svh; padding-block: 132px 48px; }
 }
+/* Last stop: "Join the build" is trimmed so it and the footer fill exactly one screen. Needs ~840px of
+   height to fit both; shorter screens keep two stops (Join, then the footer). */
+@media (min-width: 901px) and (min-height: 840px) and (prefers-reduced-motion: no-preference) {
+  .section.join { height: calc(100svh - var(--footer-h, 409px)); padding-block: 132px 0; }
+}
 @media (min-width: 901px) and (max-width: 980px) and (min-height: 600px) and (prefers-reduced-motion: no-preference) {
   .hero-inner { min-height: calc(100svh - 64px); }
 }
