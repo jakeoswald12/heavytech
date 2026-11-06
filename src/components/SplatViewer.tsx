@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Annotation, SplatModel } from "@/data/site";
+import { whenIdle } from "@/lib/whenIdle";
 
 type Status = "loading" | "live" | "error";
 const NO_ANNOTATIONS: Annotation[] = [];
@@ -218,7 +219,8 @@ export default function SplatViewer({
           wrapper.position.y = model.y;
           scene.add(wrapper);
           const groundY = model.y + (box.min.y - c.y) * k;
-          const ground = look.makeGround(THREE, model.scale);
+          // The faint floor light is for the full-bleed hero; framed cards and pages get the shadow only.
+          const ground = look.makeGround(THREE, model.scale, { pool: !bare && !compact });
           ground.position.y = groundY;
           scene.add(ground);
           key.target.position.set(0, groundY, 0);
@@ -320,7 +322,7 @@ export default function SplatViewer({
         };
 
         let visible = true;
-        const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
+        const io = new IntersectionObserver((es) => (visible = es[es.length - 1].isIntersecting)); // latest entry wins
         io.observe(stage);
         renderer.setAnimationLoop(() => {
           if (!visible) return;
@@ -343,25 +345,28 @@ export default function SplatViewer({
       }
     };
 
-    // Cards wait until they're near the viewport so the page doesn't load every model at once.
+    // Cards load after the page has settled (or as soon as they come near), so their loading doesn't
+    // land in the middle of the visitor's first scroll.
     let near: IntersectionObserver | undefined;
+    let idle = () => {};
     if (bare) {
-      near = new IntersectionObserver(
-        ([e]) => {
-          if (e.isIntersecting) {
-            near?.disconnect();
-            start();
-          }
-        },
-        { rootMargin: "300px 0px" },
-      );
+      let started = false;
+      const go = () => {
+        if (started) return;
+        started = true;
+        near?.disconnect();
+        start();
+      };
+      near = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && go(), { rootMargin: "300px 0px" });
       near.observe(stage);
+      idle = whenIdle(go, 1200);
     } else {
       start();
     }
 
     return () => {
       disposed = true;
+      idle();
       near?.disconnect();
       cleanup();
     };

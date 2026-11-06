@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { whenIdle } from "@/lib/whenIdle";
 
 /** One feature's view: which parts are shown as a studio render, and where the camera sits. */
 export type FeatureView = {
@@ -196,7 +197,7 @@ export default function TechModel({
         canvas.addEventListener("pointercancel", onUp);
 
         let visible = true;
-        const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
+        const io = new IntersectionObserver((es) => (visible = es[es.length - 1].isIntersecting)); // latest entry wins
         io.observe(stage);
         renderer.setAnimationLoop((now) => {
           if (!visible) return;
@@ -243,19 +244,21 @@ export default function TechModel({
       }
     };
 
-    // Load when the section is near, not with the page.
-    const near = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          near.disconnect();
-          start();
-        }
-      },
-      { rootMargin: "400px 0px" },
-    );
+    // Load once the page has settled (or sooner if the section comes near), so the work is done
+    // before the visitor scrolls here rather than in the middle of their scroll.
+    let started = false;
+    const go = () => {
+      if (started) return;
+      started = true;
+      near.disconnect();
+      start();
+    };
+    const near = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && go(), { rootMargin: "400px 0px" });
     near.observe(stage);
+    const idle = whenIdle(go, 2500);
     return () => {
       disposed = true;
+      idle();
       near.disconnect();
       cleanup();
     };

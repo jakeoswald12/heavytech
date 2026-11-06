@@ -136,7 +136,8 @@ export const machines: Machine[] = [
       { src: "/images/machines/ctl_access.webp", alt: "HT-1 with service panels open showing the power module", caption: "Service access" },
       { src: "/images/technology/guts.webp", alt: "HT-1 swappable power module", caption: "Swappable power module" },
     ],
-    model: { src: "/models/ht-1.splat", rotX: Math.PI, rotY: Math.PI, scale: 1.25, y: 0.03 },
+    // The founder's CAD model (ARLO and DefenseX keep their photo-built splats until their CAD arrives).
+    model: { kind: "glb", src: "/models/ht1-cad.glb", rotX: 0, rotY: -1.6, scale: 1.25, y: 0.03, cardFit: 1.0 },
   },
   {
     slug: "arlo",

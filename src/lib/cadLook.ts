@@ -48,7 +48,8 @@ export async function styleCadModel(THREE: Three, model: T.Object3D) {
     const m = o as T.Mesh;
     if (!m.isMesh) return;
     const part = partOf(m);
-    m.geometry = toCreasedNormals(m.geometry, THREE.MathUtils.degToRad(32));
+    // The GLB ships with creased normals baked in; computing them here froze the page for ~1s.
+    if (!m.geometry.attributes.normal) m.geometry = toCreasedNormals(m.geometry, THREE.MathUtils.degToRad(32));
     m.material = mats[part];
     m.castShadow = part !== "glass";
     m.receiveShadow = true;

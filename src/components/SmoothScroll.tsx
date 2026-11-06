@@ -88,6 +88,8 @@ export default function SmoothScroll() {
     // tail was ignored until the tail ended, or until the mouse moved, which cancels momentum.)
     let lastWheel = 0;
     let lastSpeed = 0;
+    let rises = 0;
+    const recent: [number, number][] = []; // [time, speed] of the last ~400ms of wheel events
     let streak = 0; // events in the current gesture
     let used = false;
     const onWheel = (e: WheelEvent) => {
@@ -106,9 +108,20 @@ export default function SmoothScroll() {
       const hiccup = streak > 8 && gap < 2500 && lastSpeed > 3 && speed <= lastSpeed * 1.15;
       const quiet = gap > GESTURE_GAP && !hiccup;
       streak = quiet ? 1 : streak + 1;
-      // A swipe ramps up over its first ~100ms, so only count a speed jump as a new swipe once the
-      // step it started is well under way.
-      const surge = now - stepAt > 300 && speed > 8 && speed > lastSpeed * 1.6;
+      // A new swipe is a clear rise above the speeds of a moment ago. Comparing with just the
+      // previous event was too twitchy: hard swipes report jittery deltas that jump 1.6x between events,
+      // which counted as a second swipe and skipped two sections. A swipe also ramps up over its first
+      // ~100ms, so nothing counts until the step it started is well under way.
+      // "Before" is the fastest event from 120-400ms ago: during a momentum tail that's at least as
+      // fast as now, while a fresh swipe ramps from near zero to full speed in well under 120ms.
+      while (recent.length && now - recent[0][0] > 400) recent.shift();
+      let before = 0;
+      for (const [t, v] of recent) if (now - t >= 120) before = Math.max(before, v);
+      recent.push([now, speed]);
+      // Two rising events in a row: a real swipe keeps climbing, a jitter spike in the momentum doesn't.
+      const rising = now - stepAt > 450 && speed > 12 && speed > before * 1.8 + 10;
+      rises = rising ? rises + 1 : 0;
+      const surge = rises >= 2;
       const dir = e.deltaY > 0 ? 1 : -1;
       if (moving && surge && !queued) queued = dir;
       if (quiet || (surge && !moving)) used = false;

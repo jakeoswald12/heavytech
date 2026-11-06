@@ -57,7 +57,7 @@ export default function FeatureRotator({
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.3 });
+    const io = new IntersectionObserver((es) => setOnScreen(es[es.length - 1].isIntersecting), { threshold: 0.3 });
     io.observe(el);
     return () => io.disconnect();
   }, []);
