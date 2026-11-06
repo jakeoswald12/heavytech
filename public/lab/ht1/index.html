@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>HT-1 Render Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400&family=Tomorrow:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/models/ht1-cad.glb" as="fetch" crossorigin>
+<style>
+  :root {
+    --bg: #0d0d0c; --fg: #eeeae4; --fg-2: #8f8b84; --rule: #2a2926; --accent: #f2b20d;
+    --gutter: max(16px, 1.6vw);
+  }
+  body[data-style="graphite"] { --bg: #ece7e0; --fg: #1a1a1a; --fg-2: #6a655e; --rule: #d3ccc2; --accent: #c98c00; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font: 300 11px/1.6 "Martian Mono", ui-monospace, Menlo, monospace; letter-spacing: -0.01em;
+    transition: background-color 0.5s, color 0.5s;
+    -webkit-font-smoothing: antialiased;
+  }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+  .ui { position: fixed; z-index: 2; pointer-events: none; }
+  .ui > * { pointer-events: auto; }
+  .top { top: 0; left: 0; right: 0; display: flex; align-items: flex-start; gap: 24px;
+         padding: max(16px, env(safe-area-inset-top)) var(--gutter) 0; }
+  .wordmark { font: 700 22px/1 Tomorrow, sans-serif; letter-spacing: -0.02em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
+  .label { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-2); }
+  .meta { margin-left: auto; text-align: right; }
+  .meta b { font-weight: 400; color: var(--fg); }
+
+  /* style switcher */
+  .styles { left: var(--gutter); bottom: max(18px, env(safe-area-inset-bottom)); display: grid; gap: 10px; max-width: calc(100vw - 2 * var(--gutter)); }
+  .seg { display: flex; flex-wrap: wrap; border: 1px solid var(--rule); border-radius: 3px; width: max-content; max-width: 100%; overflow: hidden;
+         background: color-mix(in srgb, var(--bg) 75%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .seg button { font: inherit; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-2);
+                background: none; border: 0; border-right: 1px solid var(--rule); padding: 10px 14px; cursor: pointer; transition: color 0.2s, background 0.2s; }
+  .seg button:last-child { border-right: 0; }
+  .seg button:hover { color: var(--fg); }
+  .seg button[aria-pressed="true"] { color: var(--bg); background: var(--fg); }
+  .toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; width: max-content; color: var(--fg-2); }
+  .toggle input { appearance: none; width: 28px; height: 16px; border: 1px solid var(--rule); border-radius: 9px; position: relative; margin: 0; cursor: pointer; transition: border-color .2s; }
+  .toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--fg-2); transition: transform .25s, background .25s; }
+  .toggle input:checked { border-color: var(--accent); }
+  .toggle input:checked::after { transform: translateX(12px); background: var(--accent); }
+
+  /* callouts */
+  .callouts { right: var(--gutter); bottom: max(18px, env(safe-area-inset-bottom)); width: min(340px, 42vw); display: grid; gap: 4px; }
+  .callout { all: unset; display: grid; grid-template-columns: auto 1fr; column-gap: 12px; cursor: pointer; padding: 8px 0; border-top: 1px solid var(--rule); }
+  .callout .num { display: flex; align-items: center; gap: 8px; color: var(--fg-2); font-size: 10.5px; letter-spacing: .06em; }
+  .callout .dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--fg-2); transition: background .3s, border-color .3s; }
+  .callout .ttl { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--fg-2); transition: color .3s; align-self: center; }
+  .callout .ttl span { border: 1px solid transparent; padding: 1px 8px; transition: border-color .3s; }
+  .callout .desc { grid-column: 2; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s ease; }
+  .callout .desc > div { overflow: hidden; }
+  .callout .desc p { margin: 0; padding-top: 8px; text-transform: uppercase; letter-spacing: .03em; color: var(--fg-2); font-size: 10.5px; line-height: 1.65; }
+  .callout[aria-current="true"] .dot { background: var(--accent); border-color: var(--accent); }
+  .callout[aria-current="true"] .ttl { color: var(--fg); }
+  .callout[aria-current="true"] .ttl span { border-color: var(--fg); }
+  .callout[aria-current="true"] .desc { grid-template-rows: 1fr; }
+  body[data-lenses="off"] .callouts, body[data-lenses="off"] .lens-frame, body[data-lenses="off"] .lead { opacity: 0; pointer-events: none; }
+
+  .lens-frame { position: fixed; z-index: 1; border: 1px solid var(--accent); pointer-events: none; opacity: 0; transition: opacity .35s; }
+  .lens-frame.on { opacity: 1; }
+  .lens-frame i { position: absolute; left: -4px; bottom: -4px; width: 7px; height: 7px; background: var(--accent); transform: rotate(45deg); }
+  .lens-frame .tag { position: absolute; left: 0; top: -20px; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+  svg.lead { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; transition: opacity .35s; }
+  svg.lead line { stroke: var(--accent); stroke-width: 1; }
+
+  .loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; transition: opacity .6s; }
+  .loading.done { opacity: 0; }
+
+  @media (max-width: 760px) {
+    .top { flex-wrap: wrap; gap: 6px 16px; }
+    .meta { margin-left: 0; text-align: left; width: 100%; }
+    .callouts { left: var(--gutter); right: var(--gutter); width: auto; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 96px); }
+    .callout .desc p { display: none; }
+    .seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .seg button { padding: 9px 10px; flex: none; }
+  }
+</style>
+</head>
+<body data-style="studio" data-lenses="on">
+  <div class="loading label" id="loading">Loading model 0%</div>
+
+  <header class="ui top">
+    <a class="wordmark" href="/">HeavyTech</a>
+    <span class="label" style="padding-top:6px">HT-1 · Render study</span>
+    <div class="meta label">From <b>HT-1 Main Assembly P2</b><br><span id="stats">—</span></div>
+  </header>
+
+  <div class="lens-frame" id="lensFrame"><span class="tag" id="lensTag"></span><i></i></div>
+  <svg class="lead" id="lead" aria-hidden="true"><line id="leadLine" x1="0" y1="0" x2="0" y2="0"/></svg>
+
+  <div class="ui callouts" id="callouts"></div>
+
+  <div class="ui styles">
+    <label class="toggle label"><input type="checkbox" id="lensToggle" checked> Lenses</label>
+    <div class="seg" role="group" aria-label="Render style" id="seg"></div>
+  </div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+
+const MODEL = "/models/ht1-cad.glb";
+const $ = (id) => document.getElementById(id);
+
+/* ---------- renderer, scene, camera ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.05, 60);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.enablePan = false;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.55;
+controls.minPolarAngle = 0.25;
+controls.maxPolarAngle = Math.PI / 2 - 0.04;
+
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.bias = -0.0004;
+key.shadow.normalBias = 0.02;
+key.shadow.radius = 6;
+const keyCam = key.shadow.camera;
+keyCam.left = keyCam.bottom = -3; keyCam.right = keyCam.top = 3; keyCam.near = 0.5; keyCam.far = 14;
+const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 0.5);
+scene.add(key, key.target, hemi);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.ShadowMaterial({ opacity: 0.45 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const grid = new THREE.GridHelper(9, 36, 0xf2b20d, 0xf2b20d);
+grid.material.transparent = true;
+grid.material.opacity = 0.09;
+grid.material.depthWrite = false;
+scene.add(grid);
+
+/* ---------- materials for each look ---------- */
+const ORANGE = 0xe8a000;
+const fresnel = (color, power, strength, extra = {}) =>
+  new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(color) }, uPow: { value: power }, uStr: { value: strength } },
+    vertexShader: `varying vec3 vN; varying vec3 vV;
+      void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uPow; uniform float uStr; varying vec3 vN; varying vec3 vV;
+      void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), uPow); gl_FragColor = vec4(uColor * f * uStr, f * uStr); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, ...extra,
+  });
+
+// Thermal: heat from height + facing, with the powertrain running hottest.
+const thermal = (hot) =>
+  new THREE.ShaderMaterial({
+    uniforms: { uHot: { value: hot } },
+    vertexShader: `varying vec3 vN; varying vec3 vW; varying vec3 vV;
+      void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW = w.xyz; vec4 mv = viewMatrix*w; vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform float uHot; varying vec3 vN; varying vec3 vW; varying vec3 vV;
+      vec3 ramp(float t){ t = clamp(t,0.0,1.0);
+        vec3 c0=vec3(0.02,0.0,0.06), c1=vec3(0.24,0.03,0.33), c2=vec3(0.78,0.09,0.36), c3=vec3(1.0,0.43,0.0), c4=vec3(1.0,0.84,0.31), c5=vec3(1.0,1.0,0.92);
+        if(t<0.2) return mix(c0,c1,t/0.2); if(t<0.45) return mix(c1,c2,(t-0.2)/0.25); if(t<0.7) return mix(c2,c3,(t-0.45)/0.25);
+        if(t<0.88) return mix(c3,c4,(t-0.7)/0.18); return mix(c4,c5,(t-0.88)/0.12); }
+      void main(){ float facing = abs(dot(normalize(vN), normalize(vV)));
+        float t = 0.18 + 0.32*facing - 0.06*vW.y + uHot; gl_FragColor = vec4(ramp(t),1.0); }`,
+    side: THREE.DoubleSide,
+  });
+
+const phys = (o) => new THREE.MeshPhysicalMaterial({ envMapIntensity: 1, side: THREE.DoubleSide, ...o });
+const STYLES = {
+  studio: {
+    name: "Studio", bg: 0x0d0d0c, env: 0.9, key: 2.2, hemi: 0.35, shadow: 0.55, grid: false, tone: 1.05,
+    mats: () => {
+      const paint = phys({ color: ORANGE, roughness: 0.42, metalness: 0.05, clearcoat: 0.5, clearcoatRoughness: 0.3 });
+      const black = phys({ color: 0x1b1b1a, roughness: 0.55, metalness: 0.2 });
+      return {
+        body: paint, pack: paint, arm: black, bucket: black,
+        track: phys({ color: 0x141413, roughness: 0.92 }),
+        dark: phys({ color: 0x232322, roughness: 0.7, metalness: 0.1 }),
+        sensor: phys({ color: 0x2e2e2d, roughness: 0.3, metalness: 0.6 }),
+        glass: phys({ color: 0x0d1114, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.38, depthWrite: false }),
+      };
+    },
+  },
+  graphite: {
+    name: "Graphite", bg: 0xece7e0, env: 0.6, key: 1.8, hemi: 0.9, shadow: 0.2, grid: false, tone: 1.0,
+    mats: () => {
+      const g = new THREE.MeshStandardMaterial({ color: 0x7c7872, roughness: 0.78, metalness: 0.15, side: THREE.DoubleSide, envMapIntensity: 0.6 });
+      const d = new THREE.MeshStandardMaterial({ color: 0x4f4c48, roughness: 0.85, metalness: 0.1, side: THREE.DoubleSide, envMapIntensity: 0.5 });
+      return { body: g, pack: g, arm: g, bucket: g, sensor: d, track: d, dark: d,
+        glass: new THREE.MeshStandardMaterial({ color: 0x3d3b38, roughness: 0.15, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }) };
+    },
+  },
+  blueprint: {
+    name: "Blueprint", bg: 0x0a0b0d, env: 0, key: 0, hemi: 0, shadow: 0, grid: true, edges: 0xf2b20d, tone: 1.0,
+    mats: () => {
+      const fill = new THREE.MeshBasicMaterial({ color: 0x0a0b0d, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: THREE.DoubleSide });
+      const all = {}; for (const k of PARTS) all[k] = fill;
+      all.glass = new THREE.MeshBasicMaterial({ visible: false });
+      return all;
+    },
+  },
+  xray: {
+    name: "X-ray", bg: 0x070708, env: 0.8, key: 1.4, hemi: 0.2, shadow: 0, grid: true, tone: 1.1,
+    mats: () => {
+      const ghost = fresnel(0xd8e6ff, 1.8, 0.95);
+      const hot = new THREE.MeshStandardMaterial({ color: 0x241a00, emissive: ORANGE, emissiveIntensity: 0.85, roughness: 0.4, metalness: 0.3, side: THREE.DoubleSide });
+      const all = {}; for (const k of PARTS) all[k] = ghost;
+      all.pack = hot;
+      return all;
+    },
+  },
+  thermal: {
+    name: "Thermal", bg: 0x050407, env: 0, key: 0, hemi: 0, shadow: 0, grid: false, tone: 1.0, toneNone: true,
+    mats: () => {
+      const cool = thermal(0.0), warm = thermal(0.12), hot = thermal(0.42);
+      return { body: cool, arm: warm, bucket: cool, track: warm, dark: cool, sensor: warm, pack: hot,
+        glass: new THREE.MeshBasicMaterial({ visible: false }) };
+    },
+  },
+};
+// The lens look used inside the inset frames (the Mekko-style orange wireframe).
+const LENS_WIRE = {
+  mats: () => {
+    const fill = new THREE.MeshBasicMaterial({ color: 0xe8662a, side: THREE.DoubleSide });
+    const all = {}; for (const k of PARTS) all[k] = fill;
+    all.glass = new THREE.MeshBasicMaterial({ visible: false });
+    return all;
+  },
+  bg: 0xd2501c,
+};
+const EDGE_MATS = {
+  blueprint: new THREE.LineBasicMaterial({ color: 0xf2b20d, transparent: true, opacity: 0.85 }),
+  wire: new THREE.LineBasicMaterial({ color: 0xffd79a, transparent: true, opacity: 0.13, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending }),
+};
+
+const PARTS = ["body", "pack", "dark", "sensor", "track", "bucket", "arm", "glass"];
+const meshes = {}; // part -> [mesh]
+let edges = null;  // LineSegments for the blueprint look, built on first use
+const matCache = {};
+const matsFor = (id) => (matCache[id] ??= (id === "wire" ? LENS_WIRE : STYLES[id]).mats());
+
+/* ---------- callouts ---------- */
+const CALLOUTS = [
+  { id: "pack", code: "HT-01", title: "Swappable powertrain", lens: "thermal",
+    text: "Battery and generator modules lift out as one pack. Run hybrid today, all-electric tomorrow." },
+  { id: "arm", code: "HT-02", title: "Electro-hydraulic arm", lens: "wire",
+    text: "Electric pumps run only on demand. No idling engine, no valve bank, far less heat." },
+  { id: "sensor", code: "HT-03", title: "Autonomy sensor module", lens: "blueprint",
+    text: "Cab-roof sensors and lights ready for assisted and remote operation." },
+];
+const anchors = {};
+let active = 0, chosen = false, lensesOn = true;
+
+const list = $("callouts");
+CALLOUTS.forEach((c, i) => {
+  const b = document.createElement("button");
+  b.className = "callout";
+  b.innerHTML = `<span class="num"><span class="dot"></span>${c.code}</span><span class="ttl"><span>${c.title}</span></span><span class="desc"><div><p>${c.text}</p></div></span>`;
+  b.addEventListener("mouseenter", () => { if (matchMedia("(hover:hover)").matches) setActive(i, true); });
+  b.addEventListener("click", () => setActive(i, true));
+  list.append(b);
+});
+function setActive(i, byUser) {
+  active = i; if (byUser) chosen = true;
+  [...list.children].forEach((el, j) => el.setAttribute("aria-current", j === i ? "true" : "false"));
+  const lensName = CALLOUTS[i].lens === "wire" ? "Wireframe" : STYLES[CALLOUTS[i].lens].name;
+  $("lensTag").textContent = `${CALLOUTS[i].code} · ${lensName}`;
+}
+setActive(0, false);
+setInterval(() => { if (!chosen) setActive((active + 1) % CALLOUTS.length, false); }, 4200);
+
+/* ---------- style switcher ---------- */
+let current = "studio";
+const seg = $("seg");
+for (const [id, s] of Object.entries(STYLES)) {
+  const b = document.createElement("button");
+  b.textContent = s.name; b.dataset.id = id;
+  b.setAttribute("aria-pressed", id === current ? "true" : "false");
+  b.addEventListener("click", () => setStyle(id));
+  seg.append(b);
+}
+$("lensToggle").addEventListener("change", (e) => { lensesOn = e.target.checked; document.body.dataset.lenses = lensesOn ? "on" : "off"; });
+
+function setStyle(id) {
+  current = id;
+  document.body.dataset.style = id;
+  [...seg.children].forEach((b) => b.setAttribute("aria-pressed", b.dataset.id === id ? "true" : "false"));
+  try { history.replaceState(null, "", "#" + id); } catch {}
+}
+
+function applyLook(id) {
+  const s = id === "wire" ? null : STYLES[id];
+  const mats = matsFor(id);
+  for (const k of PARTS) for (const m of meshes[k] || []) { m.material = mats[k] || mats.body; m.castShadow = !!s?.shadow; }
+  const lined = id === "blueprint" || id === "wire";
+  if (lined && !edges) buildEdges();
+  if (edges) { edges.visible = lined; if (lined) for (const e of edges.children) e.material = EDGE_MATS[id]; }
+  scene.environment = s && s.env ? envTex : null;
+  scene.environmentIntensity = s?.env || 0;
+  key.intensity = s?.key || 0; hemi.intensity = s?.hemi || 0;
+  ground.visible = !!s?.shadow; ground.material.opacity = s?.shadow || 0; key.castShadow = !!s?.shadow;
+  grid.visible = !!s?.grid;
+  renderer.toneMapping = s?.toneNone || !s ? THREE.NoToneMapping : THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = s?.tone || 1;
+}
+
+function buildEdges() {
+  const group = new THREE.Group();
+  for (const k of PARTS) {
+    if (k === "glass") continue;
+    for (const m of meshes[k] || []) {
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.userData.indexed, 28), EDGE_MATS.blueprint);
+      e.matrixAutoUpdate = false; e.matrix.copy(m.matrixWorld);
+      group.add(e);
+    }
+  }
+  edges = group; root.add(edges);
+}
+
+/* ---------- load ---------- */
+const root = new THREE.Group();
+scene.add(root);
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+loader.load(MODEL, (gltf) => {
+  const model = gltf.scene;
+  model.updateMatrixWorld(true);
+  // Centre on the ground, middle of the footprint.
+  const box = new THREE.Box3().setFromObject(model);
+  const c = box.getCenter(new THREE.Vector3());
+  model.position.set(-c.x, -box.min.y, -c.z);
+  root.add(model);
+  root.updateMatrixWorld(true);
+
+  let tris = 0;
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const name = (o.name + " " + (o.parent?.name || "")).toLowerCase();
+    const part = PARTS.find((p) => name.includes(p)) || "body";
+    o.userData.indexed = o.geometry;
+    tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3;
+    o.geometry = toCreasedNormals(o.geometry, THREE.MathUtils.degToRad(32));
+    o.receiveShadow = true;
+    (meshes[part] ||= []).push(o);
+  });
+  $("stats").textContent = `${(1715792 / 1048576).toFixed(1)} MB · ${Math.round(tris / 1000)}k triangles`;
+
+  // Callout anchors: the middle of the power pack's rear, one lift arm, and the roof sensors.
+  const centre = (part, filter) => {
+    const b = new THREE.Box3(), v = new THREE.Vector3();
+    for (const m of meshes[part] || []) {
+      const p = m.userData.indexed.attributes.position;
+      for (let i = 0; i < p.count; i += 7) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld); if (!filter || filter(v)) b.expandByPoint(v); }
+    }
+    return b;
+  };
+  const pb = centre("pack"); anchors.pack = pb.getCenter(new THREE.Vector3());
+  const ab = centre("arm", (v) => v.x > 0); anchors.arm = ab.getCenter(new THREE.Vector3());
+  const sb = centre("sensor"); anchors.sensor = sb.getCenter(new THREE.Vector3()); anchors.sensor.y = sb.min.y - 0.05;
+
+  const size = new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());
+  frame(size);
+  setStyle(location.hash.slice(1) in STYLES ? location.hash.slice(1) : "studio");
+  $("loading").classList.add("done");
+  window.__ready = true;
+}, (e) => { if (e.total) $("loading").textContent = `Loading model ${Math.round((e.loaded / e.total) * 100)}%`; });
+
+let modelSize = null;
+function frame(size) {
+  modelSize = size;
+  const narrow = innerWidth < 760;
+  const r = size.length() * 0.5;
+  const dist = (r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * (narrow ? 1.85 : 0.95);
+  const a = -2.35, e = 0.32; // front three-quarter, slightly above
+  controls.target.set(0, size.y * (narrow ? 0.2 : 0.42), 0);
+  camera.position.set(Math.sin(a) * Math.cos(e) * dist, controls.target.y + Math.sin(e) * dist, Math.cos(a) * Math.cos(e) * dist);
+  controls.minDistance = dist * 0.55; controls.maxDistance = dist * 1.6;
+  key.position.set(3, 6, -2.5); key.target.position.set(0, 0.6, 0);
+  controls.update();
+}
+
+controls.addEventListener("start", () => { controls.autoRotate = false; });
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (modelSize) frame(modelSize);
+});
+
+/* ---------- render loop: full look, then the lens pass inside its frame ---------- */
+const v3 = new THREE.Vector3();
+const lensFrame = $("lensFrame"), leadLine = $("leadLine");
+renderer.autoClear = false;
+renderer.setAnimationLoop(() => {
+  controls.update();
+  const W = innerWidth, H = innerHeight;
+  const s = STYLES[current];
+
+  renderer.setScissorTest(false);
+  renderer.setClearColor(s.bg, 1);
+  renderer.clear();
+  if (!window.__ready) return;
+  applyLook(current);
+  renderer.render(scene, camera);
+
+  const c = CALLOUTS[active];
+  const lensId = c.lens === current ? "wire" : c.lens;
+  const anchor = anchors[c.id];
+  if (!lensesOn || !anchor) { lensFrame.classList.remove("on"); return; }
+
+  // Lens square sits on the part; its size follows the screen.
+  const L = Math.round(Math.max(120, Math.min(220, Math.min(W, H) * 0.24)));
+  v3.copy(anchor).project(camera);
+  let x = (v3.x * 0.5 + 0.5) * W - L / 2, y = (-v3.y * 0.5 + 0.5) * H - L / 2;
+  x = Math.max(12, Math.min(W - L - 12, x)); y = Math.max(70, Math.min(H - L - 12, y));
+
+  renderer.setScissorTest(true);
+  renderer.setScissor(x, H - y - L, L, L);
+  renderer.setClearColor(lensId === "wire" ? LENS_WIRE.bg : STYLES[lensId].bg, 1);
+  renderer.clear();
+  applyLook(lensId);
+  grid.visible = false; ground.visible = false;
+  renderer.render(scene, camera);
+  renderer.setScissorTest(false);
+
+  lensFrame.style.cssText = `left:${x}px;top:${y}px;width:${L}px;height:${L}px`;
+  lensFrame.classList.add("on");
+  // Leader line from the frame's lower-left corner to the active callout's dot.
+  const dot = list.children[active].querySelector(".dot").getBoundingClientRect();
+  leadLine.setAttribute("x1", x); leadLine.setAttribute("y1", y + L);
+  leadLine.setAttribute("x2", dot.left + dot.width / 2); leadLine.setAttribute("y2", dot.top + dot.height / 2);
+});
+</script>
+</body>
+</html>
