@@ -68,8 +68,6 @@ export default function TechModel({
         renderer.setClearColor(0x000000, 0);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.NeutralToneMapping;
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         const scene = new THREE.Scene();
         const pmrem = new THREE.PMREMGenerator(renderer);
         const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -77,7 +75,6 @@ export default function TechModel({
         const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
 
         const key = new THREE.DirectionalLight(0xffffff, 1.8);
-        key.castShadow = true;
         key.shadow.mapSize.setScalar(1024);
         key.shadow.radius = 6;
         key.shadow.bias = -0.0004;
@@ -105,9 +102,6 @@ export default function TechModel({
         wrapper.scale.setScalar(k);
         scene.add(wrapper);
         const groundY = (box.min.y - c.y) * k;
-        const ground = look.makeGround(THREE, LENGTH, { pool: false }); // shadow only, no floor light
-        ground.position.y = groundY;
-        scene.add(ground);
         key.target.position.set(0, groundY, 0);
 
         // Frosted shell for everything that isn't featured. Light on a dark page, dark ink on a light one.
@@ -143,7 +137,7 @@ export default function TechModel({
           for (const x of meshes) {
             const lit = on.has(x.part) || (x.tag !== "" && on.has(x.tag));
             x.m.material = lit ? x.studio : x.part === "glass" ? hidden : shell;
-            x.m.castShadow = lit;
+            x.m.castShadow = false; // no shadows in the feature views
           }
           wordmark.visible = on.has("arm");
         };

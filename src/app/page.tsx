@@ -9,24 +9,6 @@ import { machines, news, site } from "@/data/site";
 
 const technology: Feature[] = [
   {
-    title: "Software-defined controls",
-    body: "Real-time diagnostics, seamless upgrades and an intuitive operator interface. The machine isolates a problem to a subsystem and tells the technician.",
-    image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
-    view: { highlight: ["controls", "diag"], az: 2.54, el: 0.45 },
-  },
-  {
-    title: "Machine vision",
-    body: "Camera-based sensing that understands machine state and attachment position without traditional sensors, built for operator assistance and automation.",
-    image: { src: "/images/machines/ctl_main.webp", alt: "HeavyTech HT-1 compact track loader" },
-    view: { highlight: ["roofsensor", "bucket"], az: -2.44, el: 0.3 },
-  },
-  {
-    title: "Autonomy ready",
-    body: "A sensor module mounts front and back of the cab. Add it or remove it to enable autonomous functions on your terms.",
-    image: { src: "/images/machines/defx1.webp", alt: "DefenseX autonomy-ready tracked platform" },
-    view: { highlight: ["roofsensor", "roofbars"], az: -2.3, el: 0.55 },
-  },
-  {
     title: "Swappable power",
     body: "The front of every machine is the same electric architecture; the back, where the power lives, swaps between battery-electric, hybrid and plug-in hybrid. Pick the energy source the job calls for.",
     image: { src: "/images/technology/powertrain.webp", alt: "ARLO loader shown transparent, revealing its modular powertrain" },
@@ -43,6 +25,24 @@ const technology: Feature[] = [
     body: "Real-time, high-resolution control of every function without directional or pressure control valves: less energy lost as heat, faster response, simpler diagnostics.",
     image: { src: "/images/technology/slide3.webp", alt: "Valveless hydraulic manifold" },
     view: { highlight: ["arm"], az: 1.9, el: 0.25 },
+  },
+  {
+    title: "Software-defined controls",
+    body: "Real-time diagnostics, seamless upgrades and an intuitive operator interface. The machine isolates a problem to a subsystem and tells the technician.",
+    image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
+    view: { highlight: ["controls", "diag"], az: 2.54, el: 0.45 },
+  },
+  {
+    title: "Machine vision",
+    body: "Camera-based sensing that understands machine state and attachment position without traditional sensors, built for operator assistance and automation.",
+    image: { src: "/images/machines/ctl_main.webp", alt: "HeavyTech HT-1 compact track loader" },
+    view: { highlight: ["roofsensor", "bucket"], az: -2.44, el: 0.3 },
+  },
+  {
+    title: "Autonomy ready",
+    body: "A sensor module mounts front and back of the cab. Add it or remove it to enable autonomous functions on your terms.",
+    image: { src: "/images/machines/defx1.webp", alt: "DefenseX autonomy-ready tracked platform" },
+    view: { highlight: ["roofsensor", "roofbars"], az: -2.3, el: 0.55 },
   },
 ];
 
@@ -131,7 +131,7 @@ export default function Home() {
       </section>
 
       {/* ---------- Machines ---------- */}
-      <section className="section section-lineup" id="machines">
+      <section className="section section-lineup" id="machines" data-snap>
         <div className="wrap">
           <div className="inner head-stack lineup-head">
             <Eyebrow n={1}>Machines</Eyebrow>
@@ -155,7 +155,7 @@ export default function Home() {
       <div className="model-pair">
         <StickyModel sections={stageSections} />
         {/* ---------- Technology ---------- */}
-        <section className="feature-section wrap" id="technology">
+        <section className="feature-section wrap" id="technology" data-snap>
           <div className="inner feature-inner">
             <div className="head-stack">
               <Eyebrow n={2}>Technology</Eyebrow>
@@ -166,7 +166,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Service ---------- */}
-        <section className="feature-section wrap" id="service">
+        <section className="feature-section wrap" id="service" data-snap>
           <div className="inner feature-inner">
             <div className="head-stack">
               <Eyebrow n={3}>Service</Eyebrow>
@@ -183,7 +183,7 @@ export default function Home() {
       </div>
 
       {/* ---------- Company ---------- */}
-      <section className="feature-section wrap" id="company">
+      <section className="feature-section wrap" id="company" data-snap>
         <div className="inner feature-inner">
           <div className="head-stack">
             <Eyebrow n={4}>Company</Eyebrow>
@@ -199,7 +199,7 @@ export default function Home() {
       </section>
 
       {/* ---------- News ---------- */}
-      <section className="section wrap" id="news">
+      <section className="section wrap" id="news" data-snap>
         <div className="inner">
           <NewsCarousel
             items={news}
@@ -216,7 +216,7 @@ export default function Home() {
       </section>
 
       {/* ---------- Join ---------- */}
-      <section className="section wrap join">
+      <section className="section wrap join" data-snap>
         <div className="inner join-grid">
           <span className="label" data-reveal="up">
             Reservations · Dealers · Investors
