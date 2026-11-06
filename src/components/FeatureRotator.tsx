@@ -66,7 +66,7 @@ export default function FeatureRotator({ features, label }: { features: Feature[
           );
         })}
       </ol>
-      <div className="rotator-media" data-reveal="fade" style={{ "--d": "250ms" } as React.CSSProperties}>
+      <div className={`rotator-media${views ? " is-model" : ""}`} data-reveal="fade" style={{ "--d": "250ms" } as React.CSSProperties}>
         {views ? (
           <TechModel active={active} views={views} fallback={fallback} />
         ) : features.map((f, i) => (

@@ -100,7 +100,7 @@ export async function addArmWordmark(THREE: Three, model: T.Object3D, renderer: 
  * Ground for the hero: a shadow catcher plus a very faint pool of light, both transparent so the page
  * background shows through.
  */
-export function makeGround(THREE: Three, radius: number) {
+export function makeGround(THREE: Three, radius: number, { pool: withPool = true } = {}) {
   const group = new THREE.Group();
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(radius * 6, radius * 6), new THREE.ShadowMaterial({ opacity: 0.42 }));
   shadow.rotation.x = -Math.PI / 2;
@@ -125,6 +125,6 @@ export function makeGround(THREE: Three, radius: number) {
   pool.rotation.x = -Math.PI / 2;
   pool.position.y = 0.002;
   pool.renderOrder = -1;
-  group.add(pool);
+  if (withPool) group.add(pool);
   return group;
 }

@@ -19,10 +19,10 @@ function useWide() {
 
 // Lens shift [right, up] as fractions of the canvas: wide screens put the machine right of the
 // title; phones lift it into the space above the title.
-const SHIFT_WIDE: [number, number] = [0.15, 0.06];
+const SHIFT_WIDE: [number, number] = [0.15, 0.05];
 const SHIFT_NARROW: [number, number] = [-0.06, 0.13];
 // Camera distance per layout (the canvas now spans the whole hero, so it needs pulling back).
-const MODEL_WIDE = { ...ht1CadModel, fit: 1.55 };
+const MODEL_WIDE = { ...ht1CadModel, fit: 1.38 };
 const MODEL_NARROW = { ...ht1CadModel, fit: 1.9 };
 
 /** Home-page hero: the HT-1 from the founder's CAD in the studio look, turning slowly until the visitor drags it. */

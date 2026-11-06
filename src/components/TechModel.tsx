@@ -99,7 +99,7 @@ export default function TechModel({
         wrapper.scale.setScalar(k);
         scene.add(wrapper);
         const groundY = (box.min.y - c.y) * k;
-        const ground = look.makeGround(THREE, LENGTH);
+        const ground = look.makeGround(THREE, LENGTH, { pool: false }); // shadow only, no floor light
         ground.position.y = groundY;
         scene.add(ground);
         key.target.position.set(0, groundY, 0);
@@ -145,10 +145,11 @@ export default function TechModel({
         };
 
         // Camera rig: orbit angles around the machine, eased between features.
-        const target = new THREE.Vector3(0, -0.05, 0);
+        const target = new THREE.Vector3(0, -0.13, 0);
         let az = views[0].az, el = views[0].el;
         let from = { az, el }, to = { az, el }, t0 = 0, shown = -1;
-        const DIST = 3.05;
+        // Close enough that the machine fills the tall right-hand frame (cab roof near the section title).
+        const DIST = 2.1;
         const place = (a: number, e: number) => {
           camera.position.set(Math.sin(a) * Math.cos(e) * DIST, target.y + Math.sin(e) * DIST, Math.cos(a) * Math.cos(e) * DIST);
           camera.lookAt(target);
@@ -162,7 +163,7 @@ export default function TechModel({
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
           // Pull back on tall, narrow frames so the whole machine stays in view.
-          camera.zoom = Math.min(1, (w / h) / 1.15);
+          camera.zoom = Math.min(1, w / h / 1.45) * (window.innerWidth < 861 ? 0.82 : 1);
           camera.updateProjectionMatrix();
         };
         size();
