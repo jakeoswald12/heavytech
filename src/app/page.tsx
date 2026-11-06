@@ -194,7 +194,11 @@ export default function Home() {
               Wayne, Indiana.
             </p>
           </div>
-          <FeatureRotator features={company} label="Company" />
+          <FeatureRotator
+              features={company}
+              label="Company"
+              video={{ src: "/videos/company-loop.mp4", poster: "/videos/company-loop.jpg", alt: "Machine parts being unpacked in the HeavyTech shop" }}
+            />
         </div>
       </section>
 

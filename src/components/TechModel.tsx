@@ -169,6 +169,32 @@ export default function TechModel({
         const ro = new ResizeObserver(size);
         ro.observe(stage);
 
+        // Drag to turn the machine (and tilt it a little). Picking another feature swings it back to
+        // that feature's view. Vertical swipes on touch screens still scroll the page.
+        let drag: { x: number; y: number; az: number; el: number } | null = null;
+        let held = false; // the visitor has turned it since the last feature change: no idle drift
+        canvas.style.touchAction = "pan-y";
+        const onDown = (e: PointerEvent) => {
+          drag = { x: e.clientX, y: e.clientY, az, el };
+          held = true;
+          canvas.setPointerCapture(e.pointerId);
+          canvas.dataset.dragging = "true";
+        };
+        const onMove = (e: PointerEvent) => {
+          if (!drag) return;
+          az = drag.az - (e.clientX - drag.x) * 0.008;
+          el = Math.min(1.1, Math.max(0.05, drag.el + (e.clientY - drag.y) * 0.004));
+          from = to = { az, el };
+        };
+        const onUp = () => {
+          drag = null;
+          delete canvas.dataset.dragging;
+        };
+        canvas.addEventListener("pointerdown", onDown);
+        canvas.addEventListener("pointermove", onMove);
+        canvas.addEventListener("pointerup", onUp);
+        canvas.addEventListener("pointercancel", onUp);
+
         let visible = true;
         const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
         io.observe(stage);
@@ -184,13 +210,16 @@ export default function TechModel({
             from = { az, el };
             to = { az: az + d, el: v.el };
             t0 = now;
+            held = false;
           }
-          const p = reduce ? 1 : Math.min(1, (now - t0) / DURATION);
-          const s = ease(p);
-          az = from.az + (to.az - from.az) * s;
-          el = from.el + (to.el - from.el) * s;
-          // A slow drift keeps the scene alive between changes.
-          const drift = reduce ? 0 : Math.sin(now / 2600) * 0.06;
+          if (!drag) {
+            const p = reduce ? 1 : Math.min(1, (now - t0) / DURATION);
+            const s = ease(p);
+            az = from.az + (to.az - from.az) * s;
+            el = from.el + (to.el - from.el) * s;
+          }
+          // A slow drift keeps the scene alive between changes (until the visitor takes over).
+          const drift = reduce || held ? 0 : Math.sin(now / 2600) * 0.06;
           place(az + drift, el);
           renderer.render(scene, camera);
         });
@@ -198,6 +227,10 @@ export default function TechModel({
 
         cleanup = () => {
           renderer.setAnimationLoop(null);
+          canvas.removeEventListener("pointerdown", onDown);
+          canvas.removeEventListener("pointermove", onMove);
+          canvas.removeEventListener("pointerup", onUp);
+          canvas.removeEventListener("pointercancel", onUp);
           ro.disconnect();
           io.disconnect();
           themeWatch.disconnect();

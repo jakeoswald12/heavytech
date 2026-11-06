@@ -25,9 +25,12 @@ export default function FeatureRotator({
   features,
   label,
   stageId,
+  video,
 }: {
   features: Feature[];
   label: string;
+  /** One looping, silent video shown for every item in place of the per-item images. */
+  video?: { src: string; poster: string; alt: string };
   /** With a 3D model, wide screens show it in the shared sticky stage (StickyModel) under this id. */
   stageId?: string;
 }) {
@@ -94,7 +97,21 @@ export default function FeatureRotator({
         })}
       </ol>
       <div className={`rotator-media${views ? " is-model" : ""}`} data-reveal="fade" style={{ "--d": "250ms" } as React.CSSProperties}>
-        {shared ? null : views ? (
+        {video ? (
+          <video
+            className="rotator-img is-photo"
+            data-active="true"
+            src={video.src}
+            poster={video.poster}
+            aria-label={video.alt}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+          />
+        ) : shared ? null : views ? (
           <TechModel active={active} views={views} fallback={fallback} />
         ) : features.map((f, i) => (
           // eslint-disable-next-line @next/next/no-img-element

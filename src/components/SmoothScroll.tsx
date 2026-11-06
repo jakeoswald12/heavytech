@@ -56,34 +56,62 @@ export default function SmoothScroll() {
       return [...new Set(ys)].sort((a, b) => a - b);
     };
     let moving = false;
+    let queued: 1 | -1 | 0 = 0; // a swipe that arrived mid-glide runs as soon as the glide ends
+    let stepAt = -Infinity;
     const step = (dir: 1 | -1) => {
       const y = window.scrollY;
       const s = stops();
       const target = dir > 0 ? s.find((v) => v > y + 4) : [...s].reverse().find((v) => v < y - 4);
       if (target === undefined) return;
       moving = true;
+      stepAt = lastWheel;
       lenis.scrollTo(target, {
         duration: SNAP_DURATION,
         easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
         lock: true,
-        onComplete: () => (moving = false),
+        onComplete: () => {
+          moving = false;
+          const next = queued;
+          queued = 0;
+          if (next) step(next);
+        },
       });
     };
 
-    // One gesture moves one section: the gesture's first event steps, the rest (including the
-    // trackpad's momentum tail) are swallowed until the wheel goes quiet.
+    // One gesture moves one section. A gesture's first event steps; the rest are swallowed. A gesture
+    // ends when the wheel goes quiet, or when a new swipe starts on top of the old one's momentum:
+    // macOS keeps sending a fading momentum tail for a second or more after the fingers lift, and a
+    // fresh swipe shows up as a sudden jump in speed. (Without this, a second swipe made during the
+    // tail was ignored until the tail ended, or until the mouse moved, which cancels momentum.)
     let lastWheel = 0;
+    let lastSpeed = 0;
+    let streak = 0; // events in the current gesture
     let used = false;
     const onWheel = (e: WheelEvent) => {
       if (!snap.matches || e.ctrlKey) return;
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // sideways: the news carousel
       e.preventDefault();
-      const now = performance.now();
-      if (now - lastWheel > GESTURE_GAP) used = false;
+      // Event time, not handling time: a busy frame mid-glide must not look like a pause between swipes.
+      const now = e.timeStamp;
+      const speed = Math.abs(e.deltaY);
+      const gap = now - lastWheel;
+      // A pause ends the gesture, unless the events resume at the same fading speed (a hiccup in the
+      // momentum stream rather than a new swipe; a real new swipe still registers via the speed jump).
+      // Only trackpads stream dozens of events per gesture; a mouse wheel's clicks are a few isolated ones.
+      const hiccup = streak > 8 && gap < 600 && lastSpeed > 3 && speed <= lastSpeed * 1.15;
+      const quiet = gap > GESTURE_GAP && !hiccup;
+      streak = quiet ? 1 : streak + 1;
+      // A swipe ramps up over its first ~100ms, so only count a speed jump as a new swipe once the
+      // step it started is well under way.
+      const surge = now - stepAt > 300 && speed > 8 && speed > lastSpeed * 1.6;
+      const dir = e.deltaY > 0 ? 1 : -1;
+      if (moving && surge && !queued) queued = dir;
+      if (quiet || (surge && !moving)) used = false;
       lastWheel = now;
-      if (used || moving || Math.abs(e.deltaY) < 3) return;
+      lastSpeed = speed;
+      if (used || moving || speed < 3) return;
       used = true;
-      step(e.deltaY > 0 ? 1 : -1);
+      step(dir);
     };
     const onKey = (e: KeyboardEvent) => {
       if (!snap.matches || e.altKey || e.ctrlKey || e.metaKey) return;

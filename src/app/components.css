@@ -600,7 +600,8 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 .model-stage { position: absolute; top: 0; bottom: 0; left: 40%; right: 0; z-index: 1; pointer-events: none; }
 .model-stage-pin { position: sticky; top: 0; height: 100svh; }
 @media (max-width: 860px) { .model-stage { display: none; } }
-.tech-model-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.8s ease; }
+.tech-model-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.8s ease; pointer-events: auto; cursor: grab; }
+.tech-model-canvas[data-dragging] { cursor: grabbing; }
 .tech-model[data-live="true"] .tech-model-canvas { opacity: 1; }
 
 /* ---------- One section per screen (wide, tall-enough screens; see SNAP_QUERY in SmoothScroll) ----------
