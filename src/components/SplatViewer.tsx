@@ -23,6 +23,7 @@ export default function SplatViewer({
   bleed = 0,
   startAngle = 0,
   offset = NO_OFFSET,
+  shift = NO_OFFSET,
 }: {
   model: SplatModel;
   poster: string;
@@ -45,6 +46,11 @@ export default function SplatViewer({
   startAngle?: number;
   /** Nudge the rendered model by [x, y] pixels without moving the labels (leader lines follow it). */
   offset?: [number, number];
+  /**
+   * Lens shift: move the model by [x, y] fractions of the canvas (x right, y up) without moving the
+   * canvas, so a full-bleed canvas can still put the model off-centre.
+   */
+  shift?: [number, number];
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -126,11 +132,12 @@ export default function SplatViewer({
             const t = Math.tan(((BASE_FOV / 2) * Math.PI) / 180) * (virtualH / h);
             camera.fov = (2 * Math.atan(t) * 180) / Math.PI;
             camera.aspect = w / virtualH;
-            camera.setViewOffset(w, virtualH, 0, virtualH - canvasH, w, canvasH);
+            camera.setViewOffset(w, virtualH, -shift[0] * w, virtualH - canvasH + shift[1] * h, w, canvasH);
           } else {
             camera.fov = BASE_FOV;
             camera.aspect = w / h;
-            camera.clearViewOffset();
+            if (shift[0] || shift[1]) camera.setViewOffset(w, h, -shift[0] * w, shift[1] * h, w, h);
+            else camera.clearViewOffset();
           }
           camera.position.setLength(bare ? 2.65 * (model.cardFit ?? 1) : (compact ? 3.1 : w < 700 ? 3.25 : 2.45) * (model.fit ?? 1));
           camera.updateProjectionMatrix();
@@ -326,7 +333,7 @@ export default function SplatViewer({
       near?.disconnect();
       cleanup();
     };
-  }, [model, compact, bare, annotations, bleed, startAngle, offset]);
+  }, [model, compact, bare, annotations, bleed, startAngle, offset, shift]);
 
   // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
   const showPoster = status === "error";

@@ -75,6 +75,9 @@
 /* Every header control is the same 40px height. */
 .nav-actions .btn { height: 40px; box-sizing: border-box; }
 .theme-toggle { width: 40px; height: 40px; padding: 0; justify-content: center; }
+.nav-invest { padding-inline: 16px; }
+/* Phones: no room for Invest beside Reserve; it lives in the menu instead. */
+@media (max-width: 560px) { .nav-invest { display: none; } }
 .nav-burger { display: none; width: 40px; padding: 0; justify-content: center; }
 /* Phone menu: a panel that unrolls down from the header, with its rows rising in one after another.
    Closing reverses it faster: rows fade first, then the panel rolls back up. */
@@ -152,14 +155,16 @@ main [id] { scroll-margin-top: 0; }
 .hero-copy .hero-lede { color: var(--fg); max-width: none; }
 /* Each sentence stays whole, so a wrap moves a full sentence to the next line. */
 .hero-lede span { white-space: nowrap; }
-.hero-viewer { position: absolute; inset: 0; z-index: 1; }
-@media (min-width: 861px) { .hero-viewer { left: 26%; } }
+/* The 3D canvas covers the whole hero and runs up under the see-through header, so the faint floor light
+   never meets a canvas edge. The model is placed within it by a lens shift (see HeroViewer). */
+.hero-viewer { position: absolute; inset: -116px 0 0 0; z-index: 1; }
+@media (max-width: 980px) { .hero-viewer { top: -64px; } }
 @media (max-width: 980px) { .hero-inner { min-height: min(900px, calc(100svh - 64px)); } }
 /* Phones: the model sits in the upper part of the screen, smaller, and the title and subtitle
    stay fully visible below it within the first screen. */
 @media (max-width: 700px) {
   .hero-inner { min-height: calc(100svh - 64px); padding-block: 24px 28px; }
-  .hero-viewer { inset: 3% 0 auto 0; height: 70%; }
+  .hero-viewer { top: -64px; }
   .hero-title { font-size: clamp(38px, 11vw, 56px); }
   .hero-copy { gap: 14px; }
 }
@@ -531,9 +536,11 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 .anno-labels { position: absolute; inset: 0; z-index: 3; list-style: none; margin: 0; padding: 0; pointer-events: none; opacity: 0; transition: opacity 0.8s ease 0.3s; }
 .anno-labels[data-live="true"] { opacity: 1; }
 .anno { position: absolute; }
-.anno-left { left: -6%; top: 14%; }
-.anno-right-1 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 85px); top: 4%; }
-.anno-right-2 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 40px); top: 19%; }
+/* The hero canvas starts 116px above the hero (under the header) and spans its full width; these keep
+   the labels where they sat when the canvas covered only the hero's right three-quarters. */
+.anno-left { left: 21.5%; top: calc(116px + (100% - 116px) * 0.14); }
+.anno-right-1 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 85px); top: calc(116px + (100% - 116px) * 0.04); }
+.anno-right-2 { right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 40px); top: calc(116px + (100% - 116px) * 0.19); }
 /* Callouts are quiet: title only until hovered (or clicked to pin open). */
 .anno-box {
   --anno-ink: color-mix(in srgb, var(--fg) 62%, var(--bg));
@@ -583,3 +590,8 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 @media (hover: none) {
   .nav-actions .btn-ghost:hover { background: transparent; color: var(--fg); }
 }
+
+/* ---------- Technology: 3D HT-1 with the featured system lit up ---------- */
+.tech-model { position: absolute; inset: 0; }
+.tech-model-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.8s ease; }
+.tech-model[data-live="true"] .tech-model-canvas { opacity: 1; }

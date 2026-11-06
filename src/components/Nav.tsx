@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { nav } from "@/data/site";
+import { nav, site } from "@/data/site";
 import { scrollToSection } from "./SmoothScroll";
 import ThemeToggle from "./ThemeToggle";
 
@@ -89,8 +89,12 @@ export default function Nav() {
         </nav>
         <div className="nav-actions">
           <ThemeToggle />
+          {/* Investor portal: quiet, styled like the theme toggle, so Reserve stays the gold primary. */}
+          <a href={site.investorPortal} className="btn btn-ghost nav-invest">
+            Invest
+          </a>
           <Link href="/reserve/" className="btn btn-solid nav-cta">
-            Reserve <span aria-hidden="true">↗</span>
+            Reserve
           </Link>
           <button
             type="button"
@@ -121,8 +125,14 @@ export default function Nav() {
             </li>
           ))}
           <li style={{ ["--i" as string]: nav.length }}>
-            <Link href="/reserve/">
+            <a href={site.investorPortal}>
               <span className="label">[ {String(nav.length + 1).padStart(2, "0")} ]</span>
+              <span className="display h-m">Invest</span>
+            </a>
+          </li>
+          <li style={{ ["--i" as string]: nav.length + 1 }}>
+            <Link href="/reserve/">
+              <span className="label">[ {String(nav.length + 2).padStart(2, "0")} ]</span>
               <span className="display h-m accent">Reserve</span>
             </Link>
           </li>

@@ -11,31 +11,37 @@ const technology: Feature[] = [
     title: "Software-defined controls",
     body: "Real-time diagnostics, seamless upgrades and an intuitive operator interface. The machine isolates a problem to a subsystem and tells the technician.",
     image: { src: "/images/machines/arlo_main.webp", alt: "HeavyTech power and hydraulic modules" },
+    view: { highlight: ["controls"], az: 2.54, el: 0.45 },
   },
   {
     title: "Machine vision",
     body: "Camera-based sensing that understands machine state and attachment position without traditional sensors, built for operator assistance and automation.",
     image: { src: "/images/machines/ctl_main.webp", alt: "HeavyTech HT-1 compact track loader" },
+    view: { highlight: ["roofsensor", "bucket"], az: -2.44, el: 0.3 },
   },
   {
     title: "Autonomy ready",
     body: "A sensor module mounts front and back of the cab. Add it or remove it to enable autonomous functions on your terms.",
     image: { src: "/images/machines/defx1.webp", alt: "DefenseX autonomy-ready tracked platform" },
+    view: { highlight: ["roofsensor", "roofbars"], az: -2.3, el: 0.55 },
   },
   {
     title: "Swappable power",
     body: "The front of every machine is the same electric architecture; the back, where the power lives, swaps between battery-electric, hybrid and plug-in hybrid. Pick the energy source the job calls for.",
     image: { src: "/images/technology/powertrain.webp", alt: "ARLO loader shown transparent, revealing its modular powertrain" },
+    view: { highlight: ["pack", "fan", "rearlamp"], az: -0.7, el: 0.35 },
   },
   {
     title: "Power on demand",
     body: "A dedicated electric motor drives each work-function pump, so the pump only spins when you’re working and every function gets precise, instant power.",
     image: { src: "/images/technology/slide2.webp", alt: "Electric motor coupled to a hydraulic pump with its control board" },
+    view: { highlight: ["pumps"], az: -1.35, el: 0.38 },
   },
   {
     title: "Valveless control",
     body: "Real-time, high-resolution control of every function without directional or pressure control valves: less energy lost as heat, faster response, simpler diagnostics.",
     image: { src: "/images/technology/slide3.webp", alt: "Valveless hydraulic manifold" },
+    view: { highlight: ["arm"], az: 1.9, el: 0.25 },
   },
 ];
 

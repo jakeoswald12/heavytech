@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import TechModel, { type FeatureView } from "./TechModel";
 
 export type Feature = {
   title: string;
@@ -8,6 +9,8 @@ export type Feature = {
   image: { src: string; alt: string };
   /** "render" sits on the page background; "photo" fills a framed box. */
   kind?: "render" | "photo";
+  /** When every feature has one, the media is the 3D HT-1 with this feature's parts lit up. */
+  view?: FeatureView;
 };
 
 const INTERVAL = 4000;
@@ -22,6 +25,8 @@ export default function FeatureRotator({ features, label }: { features: Feature[
   const [paused, setPaused] = useState(false);
   const [chosen, setChosen] = useState(false); // once the visitor clicks, auto-rotation stops for good
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const views = useMemo(() => (features.every((f) => f.view) ? features.map((f) => f.view as FeatureView) : null), [features]);
+  const fallback = useMemo(() => features.map((f) => f.image), [features]);
 
   const choose = useCallback((i: number) => {
     setChosen(true);
@@ -62,7 +67,9 @@ export default function FeatureRotator({ features, label }: { features: Feature[
         })}
       </ol>
       <div className="rotator-media" data-reveal="fade" style={{ "--d": "250ms" } as React.CSSProperties}>
-        {features.map((f, i) => (
+        {views ? (
+          <TechModel active={active} views={views} fallback={fallback} />
+        ) : features.map((f, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={f.title}

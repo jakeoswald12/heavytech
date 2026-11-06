@@ -85,7 +85,7 @@ export const ht1Annotations: Annotation[] = [
  * HT-1 from the founder's CAD (HT-1 Main Assembly P2), converted to a 1.7 MB mesh and styled in
  * /lab/ht1. For the GLB, `scale` is the machine's length in scene units and `rotY` turns it to face the camera.
  */
-export const ht1CadModel: SplatModel = { kind: "glb", src: "/models/ht1-cad.glb", rotX: 0, rotY: -2.73, scale: 1.3, y: 0.05 };
+export const ht1CadModel: SplatModel = { kind: "glb", src: "/models/ht1-cad.glb", rotX: 0, rotY: -2.73, scale: 1.5, y: 0.05 };
 
 /** The hero callouts, pinned to the CAD model (anchors in the GLB's own metres). */
 export const ht1CadAnnotations: Annotation[] = [

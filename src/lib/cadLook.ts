@@ -27,6 +27,19 @@ export function studioMaterials(THREE: Three) {
   } as Record<(typeof PARTS)[number], T.Material>;
 }
 
+/** Base part of a mesh ("cab", "pack", …). Meshes are named "<part>" or "<part>_<feature tag>". */
+export function partOf(m: T.Object3D) {
+  const name = `${m.name} ${m.parent?.name ?? ""}`.toLowerCase();
+  return PARTS.find((p) => name.includes(p)) ?? "body";
+}
+
+/** Feature tag of a mesh ("controls", "pumps", …), or "" when it has none. */
+export function tagOf(m: T.Object3D) {
+  const name = (m.name || m.parent?.name || "").toLowerCase();
+  const i = name.indexOf("_");
+  return i < 0 ? "" : name.slice(i + 1).replace(/[^a-z]+.*$/, "");
+}
+
 /** Applies the studio materials (and smooth-but-creased normals) to every mesh in the loaded CAD model. */
 export async function styleCadModel(THREE: Three, model: T.Object3D) {
   const { toCreasedNormals } = await import("three/examples/jsm/utils/BufferGeometryUtils.js");
@@ -34,8 +47,7 @@ export async function styleCadModel(THREE: Three, model: T.Object3D) {
   model.traverse((o) => {
     const m = o as T.Mesh;
     if (!m.isMesh) return;
-    const name = `${m.name} ${m.parent?.name ?? ""}`.toLowerCase();
-    const part = PARTS.find((p) => name.includes(p)) ?? "body";
+    const part = partOf(m);
     m.geometry = toCreasedNormals(m.geometry, THREE.MathUtils.degToRad(32));
     m.material = mats[part];
     m.castShadow = part !== "glass";
@@ -81,6 +93,7 @@ export async function addArmWordmark(THREE: Three, model: T.Object3D, renderer: 
   mesh.matrix.makeBasis(U, V, N).setPosition(0.8379, 0.8357, 0.4958);
   mesh.renderOrder = 2;
   model.add(mesh);
+  return mesh;
 }
 
 /**
@@ -106,7 +119,7 @@ export function makeGround(THREE: Three, radius: number) {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   const pool = new THREE.Mesh(
-    new THREE.PlaneGeometry(radius * 3.2, radius * 2.6),
+    new THREE.PlaneGeometry(radius * 2.2, radius * 1.8),
     new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }),
   );
   pool.rotation.x = -Math.PI / 2;
