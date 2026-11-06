@@ -14,7 +14,6 @@
     --bg: #0d0d0c; --fg: #eeeae4; --fg-2: #8f8b84; --rule: #2a2926; --accent: #f2b20d;
     --gutter: max(16px, 1.6vw);
   }
-  body[data-style="graphite"] { --bg: #ece7e0; --fg: #1a1a1a; --fg-2: #6a655e; --rule: #d3ccc2; --accent: #c98c00; }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
@@ -153,7 +152,10 @@ key.shadow.radius = 6;
 const keyCam = key.shadow.camera;
 keyCam.left = keyCam.bottom = -3; keyCam.right = keyCam.top = 3; keyCam.near = 0.5; keyCam.far = 14;
 const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 0.5);
-scene.add(key, key.target, hemi);
+// Rim light from behind so the black chassis still reads against the dark page.
+const rim = new THREE.DirectionalLight(0xffffff, 0);
+rim.position.set(-4, 3.5, 5);
+scene.add(key, key.target, hemi, rim);
 
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.ShadowMaterial({ opacity: 0.45 }));
 ground.rotation.x = -Math.PI / 2;
@@ -178,49 +180,28 @@ const fresnel = (color, power, strength, extra = {}) =>
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, ...extra,
   });
 
-// Thermal: heat from height + facing, with the powertrain running hottest.
-const thermal = (hot) =>
-  new THREE.ShaderMaterial({
-    uniforms: { uHot: { value: hot } },
-    vertexShader: `varying vec3 vN; varying vec3 vW; varying vec3 vV;
-      void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW = w.xyz; vec4 mv = viewMatrix*w; vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
-    fragmentShader: `uniform float uHot; varying vec3 vN; varying vec3 vW; varying vec3 vV;
-      vec3 ramp(float t){ t = clamp(t,0.0,1.0);
-        vec3 c0=vec3(0.02,0.0,0.06), c1=vec3(0.24,0.03,0.33), c2=vec3(0.78,0.09,0.36), c3=vec3(1.0,0.43,0.0), c4=vec3(1.0,0.84,0.31), c5=vec3(1.0,1.0,0.92);
-        if(t<0.2) return mix(c0,c1,t/0.2); if(t<0.45) return mix(c1,c2,(t-0.2)/0.25); if(t<0.7) return mix(c2,c3,(t-0.45)/0.25);
-        if(t<0.88) return mix(c3,c4,(t-0.7)/0.18); return mix(c4,c5,(t-0.88)/0.12); }
-      void main(){ float facing = abs(dot(normalize(vN), normalize(vV)));
-        float t = 0.18 + 0.32*facing - 0.06*vW.y + uHot; gl_FragColor = vec4(ramp(t),1.0); }`,
-    side: THREE.DoubleSide,
-  });
-
 const phys = (o) => new THREE.MeshPhysicalMaterial({ envMapIntensity: 1, side: THREE.DoubleSide, ...o });
+const YELLOW = 0xf0a400;
 const STYLES = {
   studio: {
-    name: "Studio", bg: 0x0d0d0c, env: 0.9, key: 2.2, hemi: 0.35, shadow: 0.55, grid: false, tone: 1.05,
+    name: "Studio", bg: 0x0d0d0c, env: 1.0, key: 2.2, hemi: 0.3, rim: 2.4, shadow: 0.55, grid: false, tone: 1.0, logo: true,
     mats: () => {
-      const paint = phys({ color: ORANGE, roughness: 0.42, metalness: 0.05, clearcoat: 0.5, clearcoatRoughness: 0.3 });
-      const black = phys({ color: 0x1b1b1a, roughness: 0.55, metalness: 0.2 });
+      // Gloss powder coat: smooth base under a hard clear layer, so the environment reflects in it.
+      const yellow = phys({ color: YELLOW, roughness: 0.28, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06 });
+      const black = phys({ color: 0x0c0c0c, roughness: 0.3, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08 });
       return {
-        body: paint, pack: paint, arm: black, bucket: black,
-        track: phys({ color: 0x141413, roughness: 0.92 }),
-        dark: phys({ color: 0x232322, roughness: 0.7, metalness: 0.1 }),
-        sensor: phys({ color: 0x2e2e2d, roughness: 0.3, metalness: 0.6 }),
-        glass: phys({ color: 0x0d1114, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.38, depthWrite: false }),
+        cab: yellow, pack: yellow,
+        body: black, arm: black, bucket: black,
+        track: phys({ color: 0x121211, roughness: 0.9 }),
+        dark: phys({ color: 0x151515, roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.15 }),
+        sensor: phys({ color: 0x2a2a29, roughness: 0.25, metalness: 0.6 }),
+        taillight: phys({ color: 0xc4000e, emissive: 0x5a0006, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.03 }),
+        glass: phys({ color: 0x0d1114, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.38, depthWrite: false }),
       };
     },
   },
-  graphite: {
-    name: "Graphite", bg: 0xece7e0, env: 0.6, key: 1.8, hemi: 0.9, shadow: 0.2, grid: false, tone: 1.0,
-    mats: () => {
-      const g = new THREE.MeshStandardMaterial({ color: 0x7c7872, roughness: 0.78, metalness: 0.15, side: THREE.DoubleSide, envMapIntensity: 0.6 });
-      const d = new THREE.MeshStandardMaterial({ color: 0x4f4c48, roughness: 0.85, metalness: 0.1, side: THREE.DoubleSide, envMapIntensity: 0.5 });
-      return { body: g, pack: g, arm: g, bucket: g, sensor: d, track: d, dark: d,
-        glass: new THREE.MeshStandardMaterial({ color: 0x3d3b38, roughness: 0.15, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }) };
-    },
-  },
   blueprint: {
-    name: "Blueprint", bg: 0x0a0b0d, env: 0, key: 0, hemi: 0, shadow: 0, grid: true, edges: 0xf2b20d, tone: 1.0,
+    name: "Blueprint", bg: 0x0a0b0d, env: 0, key: 0, hemi: 0, shadow: 0, grid: true, edges: "blueprint", tone: 1.0,
     mats: () => {
       const fill = new THREE.MeshBasicMaterial({ color: 0x0a0b0d, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: THREE.DoubleSide });
       const all = {}; for (const k of PARTS) all[k] = fill;
@@ -230,23 +211,21 @@ const STYLES = {
   },
   xray: {
     name: "X-ray", bg: 0x070708, env: 0.8, key: 1.4, hemi: 0.2, shadow: 0, grid: true, tone: 1.1,
-    mats: () => {
-      const ghost = fresnel(0xd8e6ff, 1.8, 0.95);
-      const hot = new THREE.MeshStandardMaterial({ color: 0x241a00, emissive: ORANGE, emissiveIntensity: 0.85, roughness: 0.4, metalness: 0.3, side: THREE.DoubleSide });
-      const all = {}; for (const k of PARTS) all[k] = ghost;
-      all.pack = hot;
-      return all;
-    },
+    mats: () => xrayMats(0.95),
   },
-  thermal: {
-    name: "Thermal", bg: 0x050407, env: 0, key: 0, hemi: 0, shadow: 0, grid: false, tone: 1.0, toneNone: true,
-    mats: () => {
-      const cool = thermal(0.0), warm = thermal(0.12), hot = thermal(0.42);
-      return { body: cool, arm: warm, bucket: cool, track: warm, dark: cool, sensor: warm, pack: hot,
-        glass: new THREE.MeshBasicMaterial({ visible: false }) };
-    },
+  xrayLines: {
+    name: "X-ray + Lines", bg: 0x070708, env: 0.8, key: 1.4, hemi: 0.2, shadow: 0, grid: true, tone: 1.1, edges: "white",
+    mats: () => xrayMats(0.5),
   },
 };
+// X-ray: a see-through ghost of the machine, with the powertrain solid and lit so it stands out.
+function xrayMats(strength) {
+  const ghost = fresnel(0xd8e6ff, 1.8, strength);
+  const hot = new THREE.MeshStandardMaterial({ color: 0x241a00, emissive: ORANGE, emissiveIntensity: 0.85, roughness: 0.4, metalness: 0.3, side: THREE.DoubleSide });
+  const all = {}; for (const k of PARTS) all[k] = ghost;
+  all.pack = hot;
+  return all;
+}
 // The lens look used inside the inset frames (the Mekko-style orange wireframe).
 const LENS_WIRE = {
   mats: () => {
@@ -259,18 +238,20 @@ const LENS_WIRE = {
 };
 const EDGE_MATS = {
   blueprint: new THREE.LineBasicMaterial({ color: 0xf2b20d, transparent: true, opacity: 0.85 }),
+  white: new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.24 }),
   wire: new THREE.LineBasicMaterial({ color: 0xffd79a, transparent: true, opacity: 0.13, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending }),
 };
 
-const PARTS = ["body", "pack", "dark", "sensor", "track", "bucket", "arm", "glass"];
+const PARTS = ["body", "cab", "pack", "dark", "sensor", "track", "bucket", "arm", "glass", "taillight"];
 const meshes = {}; // part -> [mesh]
+const logos = [];
 let edges = null;  // LineSegments for the blueprint look, built on first use
 const matCache = {};
 const matsFor = (id) => (matCache[id] ??= (id === "wire" ? LENS_WIRE : STYLES[id]).mats());
 
 /* ---------- callouts ---------- */
 const CALLOUTS = [
-  { id: "pack", code: "HT-01", title: "Swappable powertrain", lens: "thermal",
+  { id: "pack", code: "HT-01", title: "Swappable powertrain", lens: "xray",
     text: "Battery and generator modules lift out as one pack. Run hybrid today, all-electric tomorrow." },
   { id: "arm", code: "HT-02", title: "Electro-hydraulic arm", lens: "wire",
     text: "Electric pumps run only on demand. No idling engine, no valve bank, far less heat." },
@@ -321,12 +302,17 @@ function applyLook(id) {
   const s = id === "wire" ? null : STYLES[id];
   const mats = matsFor(id);
   for (const k of PARTS) for (const m of meshes[k] || []) { m.material = mats[k] || mats.body; m.castShadow = !!s?.shadow; }
-  const lined = id === "blueprint" || id === "wire";
-  if (lined && !edges) buildEdges();
-  if (edges) { edges.visible = lined; if (lined) for (const e of edges.children) e.material = EDGE_MATS[id]; }
+  const edgeKind = id === "wire" ? "wire" : s?.edges;
+  if (edgeKind && !edges) buildEdges();
+  if (edges) {
+    edges.visible = !!edgeKind;
+    // In X-ray + Lines the powertrain stays a clean solid render, so it gets no outlines.
+    if (edgeKind) for (const e of edges.children) { e.material = EDGE_MATS[edgeKind]; e.visible = !(edgeKind === "white" && e.userData.part === "pack"); }
+  }
+  for (const l of logos) l.visible = !!s?.logo;
   scene.environment = s && s.env ? envTex : null;
   scene.environmentIntensity = s?.env || 0;
-  key.intensity = s?.key || 0; hemi.intensity = s?.hemi || 0;
+  key.intensity = s?.key || 0; hemi.intensity = s?.hemi || 0; rim.intensity = s?.rim || 0;
   ground.visible = !!s?.shadow; ground.material.opacity = s?.shadow || 0; key.castShadow = !!s?.shadow;
   grid.visible = !!s?.grid;
   renderer.toneMapping = s?.toneNone || !s ? THREE.NoToneMapping : THREE.NeutralToneMapping;
@@ -339,7 +325,7 @@ function buildEdges() {
     if (k === "glass") continue;
     for (const m of meshes[k] || []) {
       const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.userData.indexed, 28), EDGE_MATS.blueprint);
-      e.matrixAutoUpdate = false; e.matrix.copy(m.matrixWorld);
+      e.matrixAutoUpdate = false; e.matrix.copy(m.matrixWorld); e.userData.part = k;
       group.add(e);
     }
   }
@@ -386,6 +372,7 @@ loader.load(MODEL, (gltf) => {
   const ab = centre("arm", (v) => v.x > 0); anchors.arm = ab.getCenter(new THREE.Vector3());
   const sb = centre("sensor"); anchors.sensor = sb.getCenter(new THREE.Vector3()); anchors.sensor.y = sb.min.y - 0.05;
 
+  addLogo(model);
   const size = new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());
   frame(size);
   setStyle(location.hash.slice(1) in STYLES ? location.hash.slice(1) : "studio");
@@ -393,13 +380,42 @@ loader.load(MODEL, (gltf) => {
   window.__ready = true;
 }, (e) => { if (e.total) $("loading").textContent = `Loading model ${Math.round((e.loaded / e.total) * 100)}%`; });
 
+// HEAVYTECH wordmark on the outer plate of the lift arm, set in the site's display font.
+async function addLogo(model) {
+  try { await document.fonts.load("700 200px Tomorrow"); } catch {}
+  const probe = document.createElement("canvas").getContext("2d");
+  const font = '700 200px Tomorrow, "Arial Narrow", sans-serif';
+  probe.font = font; probe.letterSpacing = "6px";
+  const tw = Math.ceil(probe.measureText("HEAVYTECH").width);
+  const cv = document.createElement("canvas");
+  cv.width = tw + 48; cv.height = 256;
+  const g = cv.getContext("2d");
+  g.font = font; g.letterSpacing = "6px"; g.fillStyle = "#ffffff"; g.textBaseline = "middle"; g.textAlign = "center";
+  g.fillText("HEAVYTECH", cv.width / 2, 136);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const H = 0.2, W = (H * cv.width) / cv.height;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(W, H),
+    new THREE.MeshPhysicalMaterial({ map: tex, transparent: true, depthWrite: false, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.08,
+      polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
+  // The plate faces +x and climbs toward the rear; the text runs down toward the bucket, like the product photos.
+  const U = new THREE.Vector3(0, -0.339, -0.941).normalize();
+  const N = new THREE.Vector3(1, 0, 0);
+  const V = new THREE.Vector3().crossVectors(N, U);
+  mesh.matrixAutoUpdate = false;
+  mesh.matrix.makeBasis(U, V, N).setPosition(0.8349 + 0.004, 0.752, 0.526);
+  mesh.renderOrder = 2;
+  model.add(mesh);
+  logos.push(mesh);
+}
+
 let modelSize = null;
 function frame(size) {
   modelSize = size;
   const narrow = innerWidth < 760;
   const r = size.length() * 0.5;
   const dist = (r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * (narrow ? 1.85 : 0.95);
-  const a = -2.35, e = 0.32; // front three-quarter, slightly above
+  const a = 2.35, e = 0.3; // front three-quarter, slightly above
   controls.target.set(0, size.y * (narrow ? 0.2 : 0.42), 0);
   camera.position.set(Math.sin(a) * Math.cos(e) * dist, controls.target.y + Math.sin(e) * dist, Math.cos(a) * Math.cos(e) * dist);
   controls.minDistance = dist * 0.55; controls.maxDistance = dist * 1.6;
@@ -407,6 +423,7 @@ function frame(size) {
   controls.update();
 }
 
+window.__debug = { camera, controls };
 controls.addEventListener("start", () => { controls.autoRotate = false; });
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
