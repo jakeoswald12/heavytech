@@ -24,6 +24,7 @@ export default function SplatViewer({
   startAngle = 0,
   offset = NO_OFFSET,
   shift = NO_OFFSET,
+  cycle,
 }: {
   model: SplatModel;
   poster: string;
@@ -51,6 +52,12 @@ export default function SplatViewer({
    * canvas, so a full-bleed canvas can still put the model off-centre.
    */
   shift?: [number, number];
+  /**
+   * Open the callouts one at a time as the model turns: `cycle.order` lists annotation indexes in the
+   * order they open, each for an equal third of a turn; `cycle.leaveAt` is how far (radians) the camera
+   * turns past the first one's surface normal before it closes and the next opens.
+   */
+  cycle?: { order: number[]; leaveAt: number };
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -60,6 +67,9 @@ export default function SplatViewer({
   const backRefs = useRef<(SVGGElement | null)[]>([]);
   // Callouts: one can be pinned open by a click; any click elsewhere closes it.
   const [pinned, setPinned] = useState<number | null>(null);
+  // The callout opened automatically as the model turns (hover and click still work on top of it).
+  const [auto, setAuto] = useState<number | null>(cycle ? cycle.order[0] : null);
+  const [hovering, setHovering] = useState(false);
   useEffect(() => {
     if (pinned === null) return;
     const close = (e: PointerEvent) => {
@@ -251,6 +261,8 @@ export default function SplatViewer({
         const dir = new THREE.Vector3();
         const toCam = new THREE.Vector3();
         const quat = new THREE.Quaternion();
+        let lastAuto = -1;
+        let firstK = -2;
         const placeLines = () => {
           if (!annotations.length) return;
           // Labels grow and shrink as they open, so their underline ends are measured every frame.
@@ -258,6 +270,26 @@ export default function SplatViewer({
           const w = stage.clientWidth;
           const h = canvasH;
           mesh.getWorldQuaternion(quat);
+          if (cycle) {
+            // Which third of the turn the camera is in, measured from where the first callout's part
+            // turns away. Auto-rotate turns the camera clockwise (azimuth decreasing).
+            const n = dir.copy(normals[cycle.order[0]]).applyQuaternion(quat);
+            const partAz = Math.atan2(n.x, n.z);
+            const camAz = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
+            const TAU = Math.PI * 2;
+            const phase = (((partAz - cycle.leaveAt - camAz) % TAU) + TAU) % TAU; // 0 at the hand-off
+            const k = Math.floor(phase / (TAU / cycle.order.length));
+            // phase 0..1/3 belongs to the 2nd callout, and so on; the first owns the last third.
+            const pick = cycle.order[(k + 1) % cycle.order.length];
+            // The first callout stays open from page load until the turn first crosses into a new third.
+            if (firstK === -2) firstK = k;
+            if (lastAuto === -1 && k === firstK) {
+              // still in the starting third
+            } else if (pick !== lastAuto) {
+              lastAuto = pick;
+              setAuto(pick);
+            }
+          }
           annotations.forEach((_, i) => {
             world.copy(anchors[i]);
             mesh.localToWorld(world);
@@ -333,7 +365,7 @@ export default function SplatViewer({
       near?.disconnect();
       cleanup();
     };
-  }, [model, compact, bare, annotations, bleed, startAngle, offset, shift]);
+  }, [model, compact, bare, annotations, bleed, startAngle, offset, shift, cycle]);
 
   // Blank while loading, then the model fades in. The studio render is only a fallback for devices without WebGL.
   const showPoster = status === "error";
@@ -375,9 +407,21 @@ export default function SplatViewer({
                 </g>
               ))}
             </svg>
-            <ol className="anno-labels" data-live={status === "live"} aria-label="Callouts">
+            <ol
+              className="anno-labels"
+              data-live={status === "live"}
+              aria-label="Callouts"
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+            >
               {annotations.map((a, i) => (
-                <li key={a.title} className={`anno anno-${a.slot}`} data-open={pinned === i}>
+                <li
+                  key={a.title}
+                  className={`anno anno-${a.slot}`}
+                  // A clicked callout wins; while the pointer is over the labels, hover decides; otherwise
+                  // the one the turning model is showing is open.
+                  data-open={pinned !== null ? pinned === i : !hovering && auto === i}
+                >
                   <div ref={(el) => void (labelRefs.current[i] = el)} className="anno-box">
                     <button
                       type="button"

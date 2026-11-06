@@ -101,7 +101,9 @@ export default function SmoothScroll() {
       // A pause ends the gesture, unless the events resume at the same fading speed (a hiccup in the
       // momentum stream rather than a new swipe; a real new swipe still registers via the speed jump).
       // Only trackpads stream dozens of events per gesture; a mouse wheel's clicks are a few isolated ones.
-      const hiccup = streak > 8 && gap < 600 && lastSpeed > 3 && speed <= lastSpeed * 1.15;
+      // The window is generous because the page can freeze for a second while 3D models load (first
+      // visit), and the momentum that piles up during the freeze must not count as a second swipe.
+      const hiccup = streak > 8 && gap < 2500 && lastSpeed > 3 && speed <= lastSpeed * 1.15;
       const quiet = gap > GESTURE_GAP && !hiccup;
       streak = quiet ? 1 : streak + 1;
       // A swipe ramps up over its first ~100ms, so only count a speed jump as a new swipe once the
