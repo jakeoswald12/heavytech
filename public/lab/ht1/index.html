@@ -166,6 +166,7 @@ const grid = new THREE.GridHelper(9, 36, 0xf2b20d, 0xf2b20d);
 grid.material.transparent = true;
 grid.material.opacity = 0.09;
 grid.material.depthWrite = false;
+grid.material.vertexColors = false; // tinted per look below
 scene.add(grid);
 
 /* ---------- materials for each look ---------- */
@@ -188,15 +189,16 @@ const STYLES = {
     mats: () => {
       // Gloss powder coat: smooth base under a hard clear layer, so the environment reflects in it.
       const yellow = phys({ color: YELLOW, roughness: 0.36, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.22 });
-      const black = phys({ color: 0x0f0f0f, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.25 });
+      const black = phys({ color: 0x111111, roughness: 0.55, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.45 });
       return {
         cab: yellow, pack: yellow,
         body: black, arm: black, bucket: black,
         track: phys({ color: 0x121211, roughness: 0.9 }),
         dark: phys({ color: 0x141414, roughness: 0.75 }), // cab interior and small fittings: matte
+        fan: phys({ color: 0x121212, roughness: 0.6 }),
         sensor: phys({ color: 0x2a2a29, roughness: 0.25, metalness: 0.6 }),
         metal: phys({ color: 0xc9c9c6, metalness: 1, roughness: 0.22 }), // rollers and bolt heads
-        taillight: phys({ color: 0xc4000e, emissive: 0x5a0006, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.03 }),
+        taillight: phys({ color: 0x4a0208, emissive: 0x120001, roughness: 0.06, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.02, specularIntensity: 1, ior: 1.5, envMapIntensity: 1.6 }),
         glass: phys({ color: 0x0b0f12, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.62, depthWrite: false }),
       };
     },
@@ -207,6 +209,16 @@ const STYLES = {
       const fill = new THREE.MeshBasicMaterial({ color: 0x0a0b0d, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: THREE.DoubleSide });
       const all = {}; for (const k of PARTS) all[k] = fill;
       all.glass = new THREE.MeshBasicMaterial({ visible: false });
+      return all;
+    },
+  },
+  blueprintPlus: {
+    name: "Blueprint+", bg: 0x0a0b0d, env: 1.0, key: 2.2, hemi: 0.3, rim: 2.4, shadow: 0, grid: true, edges: "whitePlus", tone: 1.0,
+    mats: () => {
+      const all = { ...matsFor("blueprint") };
+      const studio = matsFor("studio");
+      // The whole powertrain is fully rendered: housing, rear fan and tail lights.
+      all.pack = studio.pack; all.fan = studio.fan; all.taillight = studio.taillight;
       return all;
     },
   },
@@ -240,10 +252,11 @@ const LENS_WIRE = {
 const EDGE_MATS = {
   blueprint: new THREE.LineBasicMaterial({ color: 0xf2b20d, transparent: true, opacity: 0.85 }),
   white: new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.24 }),
+  whitePlus: new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }),
   wire: new THREE.LineBasicMaterial({ color: 0xffd79a, transparent: true, opacity: 0.13, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending }),
 };
 
-const PARTS = ["body", "cab", "pack", "dark", "sensor", "track", "bucket", "arm", "glass", "taillight", "metal"];
+const PARTS = ["body", "cab", "pack", "dark", "sensor", "track", "bucket", "arm", "glass", "taillight", "metal", "fan"];
 const meshes = {}; // part -> [mesh]
 const logos = [];
 let edges = null;  // LineSegments for the blueprint look, built on first use
@@ -308,7 +321,7 @@ function applyLook(id) {
   if (edges) {
     edges.visible = !!edgeKind;
     // In X-ray + Lines the powertrain stays a clean solid render, so it gets no outlines.
-    if (edgeKind) for (const e of edges.children) { e.material = EDGE_MATS[edgeKind]; e.visible = !(edgeKind === "white" && e.userData.part === "pack"); }
+    if (edgeKind) for (const e of edges.children) { e.material = EDGE_MATS[edgeKind]; e.visible = !((edgeKind === "white" || edgeKind === "whitePlus") && ["pack", "fan", "taillight"].includes(e.userData.part)); }
   }
   for (const l of logos) l.visible = !!s?.logo;
   scene.environment = s && s.env ? envTex : null;
@@ -316,6 +329,7 @@ function applyLook(id) {
   key.intensity = s?.key || 0; hemi.intensity = s?.hemi || 0; rim.intensity = s?.rim || 0;
   ground.visible = !!s?.shadow; ground.material.opacity = s?.shadow || 0; key.castShadow = !!s?.shadow;
   grid.visible = !!s?.grid;
+  grid.material.color.set(s?.edges === "whitePlus" ? 0xffffff : 0xf2b20d);
   renderer.toneMapping = s?.toneNone || !s ? THREE.NoToneMapping : THREE.NeutralToneMapping;
   renderer.toneMappingExposure = s?.tone || 1;
 }
@@ -395,7 +409,7 @@ async function addLogo(model) {
   g.fillText("HEAVYTECH", cv.width / 2, 136);
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const H = 0.155, W = (H * cv.width) / cv.height;
+  const H = 0.19, W = 1.1; // fills most of the 1.2 m x 0.14 m outer face
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(W, H),
     new THREE.MeshPhysicalMaterial({ map: tex, transparent: true, depthWrite: false, roughness: 0.4, clearcoat: 0.4, clearcoatRoughness: 0.25,
       polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
