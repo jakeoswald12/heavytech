@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** One feature's view: which parts are picked out in blueprint style, and where the camera sits. */
+/** One feature's view: which parts are shown as a studio render, and where the camera sits. */
 export type FeatureView = {
   /** Base parts ("pack", "arm", "bucket") and/or feature tags ("controls", "pumps") to light up. */
   highlight: string[];
@@ -17,8 +17,7 @@ const DURATION = 1400; // ms for the camera to swing between features
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /**
- * The HT-1 drawn as a frosted, see-through shell with one system picked out blueprint-style: solid
- * dark faces with gold outlines (so even black parts read clearly).
+ * The HT-1 drawn as a frosted, see-through shell with one system picked out in the full studio look.
  * When `active` changes the camera swings to that feature's angle and the highlight moves with it.
  * Falls back to the feature images when WebGL isn't available.
  */
@@ -121,44 +120,30 @@ export default function TechModel({
           const t = document.documentElement.dataset.theme;
           return t ? t === "light" : window.matchMedia("(prefers-color-scheme: light)").matches;
         };
-        // Highlight: opaque faces in the page colour, outlined in gold.
-        const fill = new THREE.MeshBasicMaterial({ color: 0x0f0f0e, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
-        const line = new THREE.LineBasicMaterial({ color: 0xf2b20d, transparent: true, opacity: 0.9 });
         const tint = () => {
           const light = isLight();
           shell.color.set(light ? 0x2c2a27 : 0xf4f4f2);
           shell.emissive.set(light ? 0x000000 : 0x1a1a1a);
           shell.opacity = light ? 0.14 : 0.17;
-          fill.color.set(light ? 0xf3eee8 : 0x0f0f0e);
-          line.color.set(light ? 0xb07a00 : 0xf2b20d);
         };
         tint();
         const themeWatch = new MutationObserver(tint);
         themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-        type Entry = { m: InstanceType<typeof THREE.Mesh>; part: string; tag: string; edges?: InstanceType<typeof THREE.LineSegments> };
+        // Highlighted parts keep their studio materials (the ones styleCadModel gave them).
+        type Entry = { m: InstanceType<typeof THREE.Mesh>; part: string; tag: string; studio: InstanceType<typeof THREE.Material> };
         const meshes: Entry[] = [];
         inner.traverse((o) => {
           const m = o as InstanceType<typeof THREE.Mesh>;
           if (!m.isMesh || m === wordmark) return;
-          meshes.push({ m, part: look.partOf(m), tag: look.tagOf(m) });
+          meshes.push({ m, part: look.partOf(m), tag: look.tagOf(m), studio: m.material as InstanceType<typeof THREE.Material> });
         });
-        // Outlines are built the first time a part is highlighted, then kept.
-        const edgesFor = (x: Entry) => {
-          if (!x.edges) {
-            x.edges = new THREE.LineSegments(new THREE.EdgesGeometry(x.m.geometry, 28), line);
-            x.m.add(x.edges);
-          }
-          return x.edges;
-        };
         const highlight = (i: number) => {
           const on = new Set(views[i]?.highlight ?? []);
           for (const x of meshes) {
             const lit = on.has(x.part) || (x.tag !== "" && on.has(x.tag));
-            x.m.material = lit ? fill : x.part === "glass" ? hidden : shell;
+            x.m.material = lit ? x.studio : x.part === "glass" ? hidden : shell;
             x.m.castShadow = lit;
-            if (lit) edgesFor(x).visible = true;
-            else if (x.edges) x.edges.visible = false;
           }
           wordmark.visible = on.has("arm");
         };

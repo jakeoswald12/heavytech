@@ -483,6 +483,7 @@ input::placeholder, textarea::placeholder { color: var(--fg-2); opacity: 1; }
 /* ---------- one-viewport feature sections ---------- */
 .feature-section { height: 100svh; min-height: 700px; padding-block: 140px 48px; border-top: 1px solid var(--rule); }
 #technology.feature-section { border-top: 0; } /* the lineup's bottom rule already divides here */
+#service.feature-section { border-top: 0; } /* Technology and Service read as one stretch around the shared model */
 .feature-inner { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(28px, 4vh, 56px); }
 .feature-inner .lede { max-width: 70ch; }
 @media (min-width: 861px) { .one-line { white-space: nowrap; } }
