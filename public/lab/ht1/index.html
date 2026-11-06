@@ -162,6 +162,18 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
+const pool = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 512;
+  const g = c.getContext("2d"), r = g.createRadialGradient(256, 256, 0, 256, 256, 256);
+  r.addColorStop(0, "rgba(255,255,255,0.34)"); r.addColorStop(0.45, "rgba(255,255,255,0.12)"); r.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = r; g.fillRect(0, 0, 512, 512);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 5), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.001; m.renderOrder = -1; m.visible = false;
+  return m;
+})();
+scene.add(pool);
+
 const grid = new THREE.GridHelper(9, 36, 0xf2b20d, 0xf2b20d);
 grid.material.transparent = true;
 grid.material.opacity = 0.09;
@@ -218,6 +230,18 @@ const STYLES = {
       const all = { ...matsFor("blueprint") };
       const studio = matsFor("studio");
       // The whole powertrain is fully rendered: housing, rear fan and tail lights.
+      all.pack = studio.pack; all.fan = studio.fan; all.taillight = studio.taillight;
+      return all;
+    },
+  },
+  old: {
+    name: "Old", bg: 0x050505, env: 0.7, key: 1.6, hemi: 0.45, rim: 1.4, shadow: 0.35, pool: true, grid: false, tone: 1.0,
+    mats: () => {
+      // Milky translucent shell: overlapping faces build up into soft white, like a frosted product cutaway.
+      const shell = phys({ color: 0xf4f4f2, roughness: 0.55, transparent: true, opacity: 0.17, depthWrite: false, emissive: 0x1a1a1a, envMapIntensity: 0.7 });
+      const studio = matsFor("studio");
+      const all = {}; for (const k of PARTS) all[k] = shell;
+      all.glass = new THREE.MeshBasicMaterial({ visible: false });
       all.pack = studio.pack; all.fan = studio.fan; all.taillight = studio.taillight;
       return all;
     },
@@ -329,6 +353,7 @@ function applyLook(id) {
   key.intensity = s?.key || 0; hemi.intensity = s?.hemi || 0; rim.intensity = s?.rim || 0;
   ground.visible = !!s?.shadow; ground.material.opacity = s?.shadow || 0; key.castShadow = !!s?.shadow;
   grid.visible = !!s?.grid;
+  pool.visible = !!s?.pool;
   grid.material.color.set(s?.edges === "whitePlus" ? 0xffffff : 0xf2b20d);
   renderer.toneMapping = s?.toneNone || !s ? THREE.NoToneMapping : THREE.NeutralToneMapping;
   renderer.toneMappingExposure = s?.tone || 1;
@@ -478,7 +503,7 @@ renderer.setAnimationLoop(() => {
   renderer.setClearColor(lensId === "wire" ? LENS_WIRE.bg : STYLES[lensId].bg, 1);
   renderer.clear();
   applyLook(lensId);
-  grid.visible = false; ground.visible = false;
+  grid.visible = false; ground.visible = false; pool.visible = false;
   renderer.render(scene, camera);
   renderer.setScissorTest(false);
 
