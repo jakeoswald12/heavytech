@@ -48,15 +48,27 @@ export default function FeatureRotator({
     setActive(i);
   }, []);
 
+  // Only auto-advance while the list is on screen, so a section always opens on its first feature.
+  const listRef = useRef<HTMLOListElement>(null);
+  const [onScreen, setOnScreen] = useState(false);
   useEffect(() => {
-    if (paused || chosen) return;
+    const el = listRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.3 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (paused || chosen || !onScreen) return;
     timer.current = setTimeout(() => setActive((a) => (a + 1) % features.length), INTERVAL);
     return () => clearTimeout(timer.current);
-  }, [active, paused, chosen, features.length]);
+  }, [active, paused, chosen, onScreen, features.length]);
 
   return (
     <div className="rotator">
       <ol
+        ref={listRef}
         className="rotator-list"
         aria-label={label}
         onMouseEnter={() => setPaused(true)}
