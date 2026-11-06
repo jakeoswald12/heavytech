@@ -195,6 +195,7 @@ const STYLES = {
         track: phys({ color: 0x121211, roughness: 0.9 }),
         dark: phys({ color: 0x151515, roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.15 }),
         sensor: phys({ color: 0x2a2a29, roughness: 0.25, metalness: 0.6 }),
+        metal: phys({ color: 0xc9c9c6, metalness: 1, roughness: 0.22 }), // rollers and bolt heads
         taillight: phys({ color: 0xc4000e, emissive: 0x5a0006, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.03 }),
         glass: phys({ color: 0x0d1114, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.38, depthWrite: false }),
       };
@@ -242,7 +243,7 @@ const EDGE_MATS = {
   wire: new THREE.LineBasicMaterial({ color: 0xffd79a, transparent: true, opacity: 0.13, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending }),
 };
 
-const PARTS = ["body", "cab", "pack", "dark", "sensor", "track", "bucket", "arm", "glass", "taillight"];
+const PARTS = ["body", "cab", "pack", "dark", "sensor", "track", "bucket", "arm", "glass", "taillight", "metal"];
 const meshes = {}; // part -> [mesh]
 const logos = [];
 let edges = null;  // LineSegments for the blueprint look, built on first use
